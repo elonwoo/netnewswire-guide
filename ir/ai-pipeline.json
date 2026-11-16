@@ -1,0 +1,259 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "NetNewsWire AI 翻译与改写",
+    "locale": "zh-CN",
+    "subtitle": "一篇文章从触发到三标签展示：翻译与改写两条任务线",
+    "quality_profile": "showcase",
+    "output": "netnewswire-ai-pipeline.html",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310"
+    }
+  },
+  "lanes": [
+    { "id": "ui", "label": "界面" },
+    { "id": "prep", "label": "准入与准备" },
+    { "id": "exc", "label": "失败与跳过", "variant": "exception" },
+    { "id": "task", "label": "任务与队列" },
+    { "id": "model", "label": "模型调用" },
+    { "id": "store", "label": "结果存储" }
+  ],
+  "phases": [
+    { "id": "intake", "label": "触发与准入", "fromCol": 0, "toCol": 1 },
+    { "id": "prepare", "label": "正文与指纹", "fromCol": 2, "toCol": 2 },
+    { "id": "split", "label": "分叉与排队", "fromCol": 3, "toCol": 4, "variant": "emphasis" },
+    { "id": "deliver", "label": "模型与展示", "fromCol": 5, "toCol": 5, "variant": "emphasis" }
+  ],
+  "mainPath": ["trigger", "gate", "content", "fp", "tr", "queue", "model", "store", "tabs"],
+  "nodes": [
+    {
+      "id": "trigger",
+      "lane": "ui",
+      "col": 0,
+      "type": "frontend",
+      "label": "翻译 / 改写触发",
+      "sublabel": "手动按钮 · 自动策略",
+      "sources": [
+        { "path": "Mac/AI/UI/AITranslationViewController.swift", "line": 330, "end_line": 340 },
+        { "path": "Mac/AI/UI/AIRewriteViewController.swift", "line": 349, "end_line": 367 },
+        { "path": "Modules/AI/Sources/AI/AutoWorkPolicy.swift", "line": 32, "end_line": 53 }
+      ]
+    },
+    {
+      "id": "gate",
+      "lane": "prep",
+      "col": 1,
+      "type": "backend",
+      "label": "语言门与开关",
+      "sublabel": "中文文章不放行",
+      "sources": [
+        { "path": "Mac/AI/Jobs/AIArticleLanguageGate.swift", "line": 17, "end_line": 32 },
+        { "path": "Mac/AI/Jobs/AIRewriteAdmission.swift", "line": 17, "end_line": 34 },
+        { "path": "Modules/Account/Sources/Account/FeedSettings.swift", "line": 93, "end_line": 121 }
+      ]
+    },
+    {
+      "id": "langskip",
+      "lane": "exc",
+      "col": 1,
+      "type": "security",
+      "label": "语言不匹配",
+      "sublabel": "静默跳过，不重试",
+      "sources": [
+        { "path": "Mac/AI/Jobs/AIJobExecutor.swift", "line": 709, "end_line": 728 },
+        { "path": "Modules/AI/Sources/AI/AutoWorkPolicy.swift", "line": 67, "end_line": 74 }
+      ]
+    },
+    {
+      "id": "content",
+      "lane": "prep",
+      "col": 2,
+      "type": "backend",
+      "label": "正文抽取与分段",
+      "sublabel": "只有标题就不译正文",
+      "sources": [
+        { "path": "Modules/AI/Sources/AI/MainContentExtractor.swift", "line": 14, "end_line": 23 },
+        { "path": "Mac/AI/Translation/AIBodySegmenter.swift", "line": 22, "end_line": 56 },
+        { "path": "Mac/AI/Translation/AIBodyTranslationRunner.swift", "line": 80, "end_line": 94 }
+      ]
+    },
+    {
+      "id": "fp",
+      "lane": "prep",
+      "col": 3,
+      "type": "backend",
+      "label": "指纹比对",
+      "sublabel": "一致即复用，不重跑",
+      "sources": [
+        { "path": "Modules/AI/Sources/AI/ContentFingerprint.swift", "line": 26, "end_line": 43 },
+        { "path": "Mac/AI/Translation/AIContentHash.swift", "line": 46, "end_line": 80 },
+        { "path": "Mac/AI/Jobs/AIJobExecutor.swift", "line": 450, "end_line": 455 }
+      ]
+    },
+    {
+      "id": "tr",
+      "lane": "task",
+      "col": 3,
+      "type": "backend",
+      "label": "翻译任务",
+      "sublabel": "标题批量 · 正文分段",
+      "yOffset": -58,
+      "sources": [
+        { "path": "Mac/AI/Jobs/AIJobExecutor.swift", "line": 428, "end_line": 465 },
+        { "path": "Modules/AI/Sources/AI/Engine.swift", "line": 37, "end_line": 45 },
+        { "path": "Modules/AI/Sources/AI/Engine.swift", "line": 78, "end_line": 90 }
+      ]
+    },
+    {
+      "id": "rw",
+      "lane": "task",
+      "col": 3,
+      "type": "backend",
+      "label": "改写任务",
+      "sublabel": "全文抓取 · 按类提示",
+      "yOffset": 58,
+      "sources": [
+        { "path": "Mac/AI/Jobs/AIJobExecutor.swift", "line": 828, "end_line": 864 },
+        { "path": "Mac/AI/Rewrite/AIRewriteService.swift", "line": 37, "end_line": 45 },
+        { "path": "Mac/AI/Rewrite/AIRewriteKindSelector.swift", "line": 32, "end_line": 70 }
+      ]
+    },
+    {
+      "id": "queue",
+      "lane": "task",
+      "col": 4,
+      "type": "messagebus",
+      "label": "统一任务队列",
+      "sublabel": "认领 · 租约 · 退避重试",
+      "sources": [
+        { "path": "Modules/AI/Sources/AI/Queue.swift", "line": 9, "end_line": 37 },
+        { "path": "Mac/AI/Jobs/AIJobFactory.swift", "line": 11, "end_line": 35 },
+        { "path": "Modules/AI/Sources/AI/Store.swift", "line": 807, "end_line": 807 }
+      ]
+    },
+    {
+      "id": "model",
+      "lane": "model",
+      "col": 5,
+      "type": "cloud",
+      "label": "模型调用",
+      "sublabel": "网关 · 提示词 · 分段",
+      "sources": [
+        { "path": "Modules/AI/Sources/AI/Client.swift", "line": 18, "end_line": 40 },
+        { "path": "Modules/AI/Sources/AI/Prompts.swift", "line": 20, "end_line": 30 },
+        { "path": "Modules/AI/Sources/AI/Engine.swift", "line": 78, "end_line": 90 }
+      ]
+    },
+    {
+      "id": "modelerr",
+      "lane": "exc",
+      "col": 4,
+      "type": "security",
+      "label": "模型调用失败",
+      "sublabel": "退避重试，4 次为止",
+      "yOffset": -46,
+      "sources": [
+        { "path": "Mac/AI/Jobs/AIJobExecutor.swift", "line": 897, "end_line": 925 },
+        { "path": "Mac/AI/Jobs/AIJobExecutor.swift", "line": 667, "end_line": 686 },
+        { "path": "Modules/AI/Sources/AI/Queue.swift", "line": 14, "end_line": 28 }
+      ]
+    },
+    {
+      "id": "quality",
+      "lane": "exc",
+      "col": 4,
+      "type": "security",
+      "label": "质量校验不通过",
+      "sublabel": "恢复旧稿或删除",
+      "yOffset": 46,
+      "sources": [
+        { "path": "Mac/AI/Rewrite/AIRewriteQualityValidator.swift", "line": 24, "end_line": 35 },
+        { "path": "Mac/AI/Rewrite/AIRewriteService.swift", "line": 62, "end_line": 84 }
+      ]
+    },
+    {
+      "id": "store",
+      "lane": "store",
+      "col": 5,
+      "type": "database",
+      "label": "结果落库",
+      "sublabel": "译文表 / 改写表",
+      "sources": [
+        { "path": "Modules/AI/Sources/AI/Store.swift", "line": 800, "end_line": 807 },
+        { "path": "Mac/AI/Rewrite/AIRewriteService.swift", "line": 57, "end_line": 61 }
+      ]
+    },
+    {
+      "id": "tabs",
+      "lane": "ui",
+      "col": 5,
+      "type": "frontend",
+      "label": "详情面板三标签",
+      "sublabel": "改写 / 原文 / 翻译",
+      "sources": [
+        { "path": "Mac/AI/UI/AIDetailPaneViewController.swift", "line": 256, "end_line": 267 },
+        { "path": "Mac/AI/UI/AIPaneTabPolicy.swift", "line": 23, "end_line": 57 }
+      ]
+    }
+  ],
+  "edges": [
+    { "id": "e-trigger-gate", "from": "trigger", "to": "gate", "variant": "emphasis", "role": "main" },
+    { "id": "e-gate-content", "from": "gate", "to": "content", "role": "main" },
+    { "id": "e-gate-langskip", "from": "gate", "to": "langskip", "label": "中文文章", "role": "error" },
+    { "id": "e-content-fp", "from": "content", "to": "fp", "label": "指纹", "role": "main" },
+    { "id": "e-fp-tr", "from": "fp", "to": "tr", "label": "翻译", "role": "main" },
+    { "id": "e-fp-rw", "from": "fp", "to": "rw", "label": "改写", "role": "branch" },
+    { "id": "e-tr-queue", "from": "tr", "to": "queue", "role": "main" },
+    { "id": "e-rw-queue", "from": "rw", "to": "queue", "label": "同一队列", "role": "branch" },
+    { "id": "e-queue-model", "from": "queue", "to": "model", "variant": "emphasis", "role": "main" },
+    { "id": "e-queue-modelerr", "from": "queue", "to": "modelerr", "label": "调用失败", "role": "error" },
+    { "id": "e-queue-quality", "from": "queue", "to": "quality", "label": "校验拒绝", "role": "error" },
+    { "id": "e-model-store", "from": "model", "to": "store", "role": "main" },
+    { "id": "e-store-tabs", "from": "store", "to": "tabs", "label": "通知刷新", "role": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "分段与指纹",
+      "items": [
+        "正文按字节预算切段：HTML 只在 </p>、</h2>、</li> 这类块边界切，绝不切进标签；每段 key 由序号、内容哈希前 16 位、字节数拼成",
+        "整篇翻译失败且有多段时才降级逐段重试；已存下的段用内容哈希校验，命中就续翻而不是从头再来",
+        "三种指纹：标题无前缀、正文 b2:、改写 r2:；r2 只序列化可见内容（标题、正文、图、链接），只改 HTML 标记不会让改写失效",
+        "全文改写的结果带 ft: 前缀，自动比对时剥掉，所以抓到页面全文也不会把已有改写判成过期"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "质量校验判据",
+      "items": [
+        "改写产物过三道关：开头 220 字符不能是拒答句式；汉字数 ≥ max(48, min(360, 原文长度×0.1))；段落数按原文长度要求 1 / 2 / 3",
+        "段落只数有效行：空行分块、去掉标题行、块内字母数字达到 12 个才计入",
+        "不通过时不静默：有旧稿就写回旧稿，没有就删掉，同时发通知让面板退回；错误以 qualityRejected 落任务日志",
+        "翻译不走这套阈值，靠返回块集合完整性校验——少一块就是 incompleteTranslation，整篇判失败"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "任务状态与重试",
+      "items": [
+        "任务状态 pending / running / retry / completed / failed 落在 ai_jobs 表；租约 5 分钟，执行中定期续租，防止两条通道重复认领",
+        "最多 4 次尝试，退避 10 分钟 / 30 分钟 / 2 小时；第 4 次失败即终局，发失败通知并写任务日志",
+        "优先级：正文翻译与手动改写 100、标题翻译 50、后台改写 10，前台可见的工作先被认领",
+        "终局任务按保留期定期清理；任务托盘提供「重试全部」入口"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "内建来源处理器与这条链路的关系",
+      "items": [
+        "BuiltInSourcesInstaller 只在首次启动替账户订阅内建源（UserDefaults 标记 AI.DidInstallBuiltInSources），失败只记日志",
+        "微信目录里几百个源故意排除，需要时从 File 菜单手动导入",
+        "它只把 feed 加进订阅列表，不参与 AI 任务本身：文章照常抓取入库，再由下载完成通知触发自动入队"
+      ]
+    }
+  ]
+}

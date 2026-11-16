@@ -1,0 +1,1142 @@
+{
+  "schema_version": 1,
+  "diagram_type": "tree",
+  "meta": {
+    "title": "NetNewsWire 能力地图",
+    "subtitle": "这个 fork 的全部功能能力，按包含关系逐层分解；每个叶子都指向仓库中的实现位置。",
+    "locale": "zh-CN",
+    "output": "netnewswire-capabilities.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310"
+    }
+  },
+  "layout": {
+    "direction": "right"
+  },
+  "nodes": [
+    {
+      "id": "nnw",
+      "label": "NetNewsWire",
+      "sublabel": "macOS RSS 阅读器 · fork 能力分解",
+      "sources": [
+        {
+          "path": "README.md"
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "label": "账户与同步",
+      "parent": "nnw",
+      "sublabel": "九类账户与远端同步",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 43,
+          "end_line": 53
+        }
+      ]
+    },
+    {
+      "id": "acc_types",
+      "label": "九类账户",
+      "parent": "account",
+      "sublabel": "本机、iCloud 与七种服务",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 43,
+          "end_line": 53
+        }
+      ]
+    },
+    {
+      "id": "acc_local",
+      "label": "本机账户",
+      "parent": "account",
+      "sublabel": "纯本地，不上传状态",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 60,
+          "end_line": 62
+        }
+      ]
+    },
+    {
+      "id": "acc_readerapi",
+      "label": "Reader 变体",
+      "parent": "account",
+      "sublabel": "四种变体，可填自建地址",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/ReaderAPI/ReaderAPIVariant.swift",
+          "line": 10,
+          "end_line": 15
+        }
+      ]
+    },
+    {
+      "id": "acc_cloudkit",
+      "label": "CloudKit 同步",
+      "parent": "account",
+      "sublabel": "订阅与已读星标双向同步",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/CloudKit/CloudKitAccountDelegate.swift",
+          "line": 224,
+          "end_line": 248
+        },
+        {
+          "path": "Modules/Account/Sources/Account/CloudKit/CloudKitAccountDelegate.swift",
+          "line": 621,
+          "end_line": 631
+        }
+      ]
+    },
+    {
+      "id": "acc_keychain",
+      "label": "Keychain 凭据",
+      "parent": "account",
+      "sublabel": "密码存系统钥匙串",
+      "sources": [
+        {
+          "path": "Modules/Secrets/Sources/Secrets/CredentialsManager.swift",
+          "line": 48,
+          "end_line": 64
+        }
+      ]
+    },
+    {
+      "id": "acc_addpanel",
+      "label": "添加账户面板",
+      "parent": "account",
+      "sublabel": "本地、iCloud、自建与服务",
+      "sources": [
+        {
+          "path": "Mac/Preferences/Accounts/AddAccountsView.swift",
+          "line": 23,
+          "end_line": 44
+        }
+      ]
+    },
+    {
+      "id": "subscriptions",
+      "label": "订阅管理",
+      "parent": "nnw",
+      "sublabel": "添加、整理、迁移订阅",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 697
+        }
+      ]
+    },
+    {
+      "id": "sub_url",
+      "label": "URL 加订阅",
+      "parent": "subscriptions",
+      "sublabel": "直接输入或粘贴 feed 地址",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 697
+        }
+      ]
+    },
+    {
+      "id": "sub_discover",
+      "label": "网页发现订阅源",
+      "parent": "subscriptions",
+      "sublabel": "从网页链接找 feed",
+      "sources": [
+        {
+          "path": "Modules/FeedFinder/Sources/FeedFinder/FeedFinder.swift",
+          "line": 52,
+          "end_line": 90
+        }
+      ]
+    },
+    {
+      "id": "sub_opml",
+      "label": "OPML 导入导出",
+      "parent": "subscriptions",
+      "sublabel": "订阅清单交换",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 520
+        },
+        {
+          "path": "Shared/Exporters/OPMLExporter.swift",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "id": "sub_wechat",
+      "label": "公众号目录导入",
+      "parent": "subscriptions",
+      "sublabel": "内建微信公众号目录",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 945
+        },
+        {
+          "path": "Mac/AI/WeChatCatalogImporter.swift",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "id": "sub_folder",
+      "label": "文件夹单层",
+      "parent": "subscriptions",
+      "sublabel": "不支持子文件夹",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 626,
+          "end_line": 628
+        }
+      ]
+    },
+    {
+      "id": "sub_edit",
+      "label": "增删改可撤销",
+      "parent": "subscriptions",
+      "sublabel": "重命名、移动、删除",
+      "sources": [
+        {
+          "path": "Shared/Commands/DeleteCommand.swift",
+          "line": 18,
+          "end_line": 40
+        }
+      ]
+    },
+    {
+      "id": "sub_drag",
+      "label": "跨账户拖拽",
+      "parent": "subscriptions",
+      "sublabel": "侧栏直接移动订阅",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Sidebar/SidebarOutlineDataSource.swift",
+          "line": 329,
+          "end_line": 357
+        }
+      ]
+    },
+    {
+      "id": "sub_feedsettings",
+      "label": "订阅级设置",
+      "parent": "subscriptions",
+      "sublabel": "通知、阅读器、AI、翻译",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/FeedSettings.swift",
+          "line": 70,
+          "end_line": 119
+        }
+      ]
+    },
+    {
+      "id": "sub_nnw3",
+      "label": "NNW3 迁移",
+      "parent": "subscriptions",
+      "sublabel": "导入旧版订阅清单",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/NNW3/NNW3ImportController.swift",
+          "line": 28,
+          "end_line": 45
+        }
+      ]
+    },
+    {
+      "id": "smart",
+      "label": "智能订阅",
+      "parent": "nnw",
+      "sublabel": "跨源聚合视图",
+      "sources": [
+        {
+          "path": "Shared/SmartFeeds/SmartFeedsController.swift",
+          "line": 18,
+          "end_line": 31
+        }
+      ]
+    },
+    {
+      "id": "smart_builtin",
+      "label": "三种智能订阅",
+      "parent": "smart",
+      "sublabel": "今天、全部未读、星标",
+      "sources": [
+        {
+          "path": "Shared/SmartFeeds/SmartFeedsController.swift",
+          "line": 18,
+          "end_line": 31
+        }
+      ]
+    },
+    {
+      "id": "smart_search",
+      "label": "搜索智能订阅",
+      "parent": "smart",
+      "sublabel": "搜索结果生成临时订阅",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 1013,
+          "end_line": 1022
+        }
+      ]
+    },
+    {
+      "id": "smart_readfilter",
+      "label": "独立已读过滤",
+      "parent": "smart",
+      "sublabel": "每个订阅各自记住",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineViewController.swift",
+          "line": 431,
+          "end_line": 445
+        }
+      ]
+    },
+    {
+      "id": "smart_hide",
+      "label": "智能订阅可隐藏",
+      "parent": "smart",
+      "sublabel": "侧栏按需显示",
+      "sources": [
+        {
+          "path": "Shared/SmartFeeds/SmartFeedsController.swift",
+          "line": 24,
+          "end_line": 31
+        }
+      ]
+    },
+    {
+      "id": "reading",
+      "label": "阅读与浏览",
+      "parent": "nnw",
+      "sublabel": "三栏界面与阅读体验",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 59,
+          "end_line": 61
+        }
+      ]
+    },
+    {
+      "id": "read_three",
+      "label": "三栏主界面",
+      "parent": "reading",
+      "sublabel": "侧栏、时间线、正文",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 20
+        },
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 59,
+          "end_line": 61
+        }
+      ]
+    },
+    {
+      "id": "read_columns",
+      "label": "时间线五列",
+      "parent": "reading",
+      "sublabel": "五列与五种排序",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineColumn.swift",
+          "line": 12,
+          "end_line": 17
+        },
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineViewController+ColumnLayout.swift",
+          "line": 103,
+          "end_line": 113
+        }
+      ]
+    },
+    {
+      "id": "read_keys",
+      "label": "键盘导航",
+      "parent": "reading",
+      "sublabel": "全局与时间线快捷键",
+      "sources": [
+        {
+          "path": "Shared/Resources/GlobalKeyboardShortcuts.plist",
+          "line": 10,
+          "end_line": 20
+        },
+        {
+          "path": "Shared/Resources/TimelineKeyboardShortcuts.plist",
+          "line": 8,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "id": "read_readerview",
+      "label": "阅读器视图",
+      "parent": "reading",
+      "sublabel": "正文抽取与视图切换",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 655,
+          "end_line": 695
+        }
+      ]
+    },
+    {
+      "id": "read_webview",
+      "label": "正文 WebView",
+      "parent": "reading",
+      "sublabel": "WKWebView 渲染文章",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Detail/DetailWebViewController.swift",
+          "line": 318,
+          "end_line": 334
+        }
+      ]
+    },
+    {
+      "id": "read_theme",
+      "label": "字号与主题",
+      "parent": "reading",
+      "sublabel": "五档字号与 .nnwtheme",
+      "sources": [
+        {
+          "path": "Mac/Preferences/Appearance/Base.lproj/AppearancePreferencesView.xib",
+          "line": 156,
+          "end_line": 219
+        },
+        {
+          "path": "Shared/ArticleStyles/ArticleTheme.swift",
+          "line": 11,
+          "end_line": 14
+        }
+      ]
+    },
+    {
+      "id": "read_immersive",
+      "label": "沉浸式阅读",
+      "parent": "reading",
+      "sublabel": "隐藏侧栏与时间线",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Keyboard/ImmersiveReadingMode.swift",
+          "line": 15,
+          "end_line": 31
+        }
+      ]
+    },
+    {
+      "id": "read_share",
+      "label": "分享与导出",
+      "parent": "reading",
+      "sublabel": "MarsEdit、Micro.blog、系统",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineViewController+ContextualMenus.swift",
+          "line": 195,
+          "end_line": 225
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "label": "AI 增强",
+      "parent": "nnw",
+      "sublabel": "fork 特有的 AI 流水线",
+      "sources": [
+        {
+          "path": "Mac/AI/UI/AIChatViewController.swift",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "id": "ai_chat",
+      "label": "AI 对话栏",
+      "parent": "ai",
+      "sublabel": "带当前文章上下文",
+      "sources": [
+        {
+          "path": "Mac/AI/UI/AIChatViewController.swift",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "id": "ai_translate",
+      "label": "正文翻译",
+      "parent": "ai",
+      "sublabel": "标题与正文，指纹去重",
+      "sources": [
+        {
+          "path": "Mac/AI/Translation/AIBodyTranslationRunner.swift",
+          "line": 16
+        },
+        {
+          "path": "Mac/AI/Translation/AITranslationService.swift",
+          "line": 31
+        },
+        {
+          "path": "Mac/AI/Translation/AIContentHash.swift",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "id": "ai_rewrite",
+      "label": "AI 改写",
+      "parent": "ai",
+      "sublabel": "质量校验与类型选择",
+      "sources": [
+        {
+          "path": "Mac/AI/Rewrite/AIRewriteService.swift",
+          "line": 25
+        },
+        {
+          "path": "Mac/AI/Rewrite/AIRewriteQualityValidator.swift",
+          "line": 22
+        },
+        {
+          "path": "Mac/AI/Rewrite/AIRewriteKindSelector.swift",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "id": "ai_extract",
+      "label": "正文抽取分片",
+      "parent": "ai",
+      "sublabel": "先抽正文再分片",
+      "sources": [
+        {
+          "path": "Modules/AI/Sources/AI/MainContentExtractor.swift",
+          "line": 12
+        },
+        {
+          "path": "Mac/AI/Translation/AIBodySegmenter.swift",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "id": "ai_lang",
+      "label": "语言门",
+      "parent": "ai",
+      "sublabel": "按文章与订阅语言过滤",
+      "sources": [
+        {
+          "path": "Mac/AI/Jobs/AIArticleLanguageGate.swift",
+          "line": 15
+        },
+        {
+          "path": "Mac/AI/Jobs/AIFeedLanguageDetector.swift",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "id": "ai_prompt",
+      "label": "自定义提示词",
+      "parent": "ai",
+      "sublabel": "用户保存的提示词库",
+      "sources": [
+        {
+          "path": "Mac/AI/UI/AICustomPromptStore.swift",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "id": "ai_queue",
+      "label": "任务队列",
+      "parent": "ai",
+      "sublabel": "持久化队列与状态显示",
+      "sources": [
+        {
+          "path": "Modules/AI/Sources/AI/Queue.swift",
+          "line": 37
+        },
+        {
+          "path": "Mac/AI/Jobs/AIJobExecutor.swift",
+          "line": 99
+        },
+        {
+          "path": "Mac/AI/UI/AIJobStatusView.swift",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "id": "ai_gateway",
+      "label": "网关与模型",
+      "parent": "ai",
+      "sublabel": "地址、Key、模型选择",
+      "sources": [
+        {
+          "path": "Mac/Preferences/AI/AIPreferencesViewController.swift",
+          "line": 35,
+          "end_line": 90
+        }
+      ]
+    },
+    {
+      "id": "ai_sources",
+      "label": "内建特色来源",
+      "parent": "ai",
+      "sublabel": "Product Hunt、论文卡、YouTube",
+      "sources": [
+        {
+          "path": "Mac/AI/Sources/ProductHuntFeed.swift",
+          "line": 22
+        },
+        {
+          "path": "Mac/AI/Sources/HuggingFacePaperCard.swift",
+          "line": 10
+        },
+        {
+          "path": "Mac/AI/Sources/YouTubeEmbedRewriter.swift",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "id": "ai_rsshub",
+      "label": "RSSHub 与代理",
+      "parent": "ai",
+      "sublabel": "多实例回退与微信图片",
+      "sources": [
+        {
+          "path": "Mac/AI/Sources/RSSHubMultiInstanceClient.swift",
+          "line": 18
+        },
+        {
+          "path": "Mac/AI/Sources/WeChatImageProxy.swift",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "id": "search",
+      "label": "搜索与索引",
+      "parent": "nnw",
+      "sublabel": "全文与 Spotlight",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 451
+        }
+      ]
+    },
+    {
+      "id": "srch_fts",
+      "label": "FTS4 索引",
+      "parent": "search",
+      "sublabel": "标题与正文全文索引",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 451
+        }
+      ]
+    },
+    {
+      "id": "srch_normalize",
+      "label": "正文归一化",
+      "parent": "search",
+      "sublabel": "剥 HTML 后写入索引",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/SearchTable.swift",
+          "line": 47,
+          "end_line": 56
+        }
+      ]
+    },
+    {
+      "id": "srch_fields",
+      "label": "三字段匹配",
+      "parent": "search",
+      "sublabel": "标题、正文、作者",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/SearchTable.swift",
+          "line": 27,
+          "end_line": 35
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 761,
+          "end_line": 777
+        }
+      ]
+    },
+    {
+      "id": "srch_ui",
+      "label": "搜索栏与结果",
+      "parent": "search",
+      "sublabel": "全局搜索与结果列表",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 81,
+          "end_line": 82
+        },
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineViewController.swift",
+          "line": 113
+        }
+      ]
+    },
+    {
+      "id": "srch_spotlight",
+      "label": "Spotlight 索引",
+      "parent": "search",
+      "sublabel": "文章同步进系统搜索",
+      "sources": [
+        {
+          "path": "Shared/Activity/ActivityManager.swift",
+          "line": 155,
+          "end_line": 166
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "label": "状态与同步",
+      "parent": "nnw",
+      "sublabel": "已读星标的本地与服务端",
+      "sources": [
+        {
+          "path": "Modules/Articles/Sources/Articles/ArticleStatus.swift",
+          "line": 14,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "id": "st_read",
+      "label": "已读与星标",
+      "parent": "status",
+      "sublabel": "两种文章状态",
+      "sources": [
+        {
+          "path": "Modules/Articles/Sources/Articles/ArticleStatus.swift",
+          "line": 14,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "id": "st_undo",
+      "label": "标记可撤销",
+      "parent": "status",
+      "sublabel": "撤销与重做",
+      "sources": [
+        {
+          "path": "Shared/Commands/MarkStatusCommand.swift",
+          "line": 15,
+          "end_line": 40
+        }
+      ]
+    },
+    {
+      "id": "st_auto",
+      "label": "半年自动已读",
+      "parent": "status",
+      "sublabel": "旧文到达即已读",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 231,
+          "end_line": 237
+        }
+      ]
+    },
+    {
+      "id": "st_queue",
+      "label": "同步队列",
+      "parent": "status",
+      "sublabel": "待发状态落库",
+      "sources": [
+        {
+          "path": "Modules/SyncDatabase/Sources/SyncDatabase/SyncDatabase.swift",
+          "line": 89,
+          "end_line": 91
+        }
+      ]
+    },
+    {
+      "id": "st_batch",
+      "label": "分批发回",
+      "parent": "status",
+      "sublabel": "超量转后台刷新",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift",
+          "line": 453,
+          "end_line": 471
+        }
+      ]
+    },
+    {
+      "id": "st_cleanup",
+      "label": "状态记录清理",
+      "parent": "status",
+      "sublabel": "清理过期 CloudKit 记录",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/CloudKit/CloudKitAccountDelegate.swift",
+          "line": 1195,
+          "end_line": 1204
+        }
+      ]
+    },
+    {
+      "id": "st_notif",
+      "label": "通知内标已读",
+      "parent": "status",
+      "sublabel": "通知动作直接改状态",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 1157,
+          "end_line": 1174
+        }
+      ]
+    },
+    {
+      "id": "system",
+      "label": "系统集成",
+      "parent": "nnw",
+      "sublabel": "通知、扩展与脚本",
+      "sources": [
+        {
+          "path": "Shared/UserNotifications/UserNotificationManager.swift",
+          "line": 66,
+          "end_line": 83
+        }
+      ]
+    },
+    {
+      "id": "sys_notif",
+      "label": "新文章通知",
+      "parent": "system",
+      "sublabel": "按订阅开关，带缩略图",
+      "sources": [
+        {
+          "path": "Shared/UserNotifications/UserNotificationManager.swift",
+          "line": 66,
+          "end_line": 83
+        }
+      ]
+    },
+    {
+      "id": "sys_share",
+      "label": "分享扩展",
+      "parent": "system",
+      "sublabel": "从系统分享加订阅",
+      "sources": [
+        {
+          "path": "Mac/ShareExtension/ShareViewController.swift",
+          "line": 96,
+          "end_line": 107
+        }
+      ]
+    },
+    {
+      "id": "sys_safari",
+      "label": "Safari 扩展",
+      "parent": "system",
+      "sublabel": "工具栏发现并打开订阅",
+      "sources": [
+        {
+          "path": "Mac/SafariExtension/SafariExtensionHandler.swift",
+          "line": 19,
+          "end_line": 25
+        }
+      ]
+    },
+    {
+      "id": "sys_url",
+      "label": "URL scheme",
+      "parent": "system",
+      "sublabel": "netnewswire、feed 等",
+      "sources": [
+        {
+          "path": "Mac/Resources/Info.plist",
+          "line": 36,
+          "end_line": 40
+        }
+      ]
+    },
+    {
+      "id": "sys_applescript",
+      "label": "AppleScript",
+      "parent": "system",
+      "sublabel": "脚本控制应用",
+      "sources": [
+        {
+          "path": "Mac/Scripting/AppDelegate+Scriptability.swift",
+          "line": 41
+        }
+      ]
+    },
+    {
+      "id": "sys_handoff",
+      "label": "Handoff 接力",
+      "parent": "system",
+      "sublabel": "跨设备继续阅读",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 305
+        },
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 316
+        }
+      ]
+    },
+    {
+      "id": "sys_dock",
+      "label": "Dock 角标",
+      "parent": "system",
+      "sublabel": "显示未读数",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 579,
+          "end_line": 583
+        }
+      ]
+    },
+    {
+      "id": "sys_sparkle",
+      "label": "Sparkle 更新",
+      "parent": "system",
+      "sublabel": "应用内检查更新",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 814,
+          "end_line": 816
+        }
+      ]
+    },
+    {
+      "id": "sys_crash",
+      "label": "崩溃报告",
+      "parent": "system",
+      "sublabel": "PLCrashReporter 收集",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 114,
+          "end_line": 117
+        }
+      ]
+    },
+    {
+      "id": "prefs",
+      "label": "偏好设置",
+      "parent": "nnw",
+      "sublabel": "六个设置页面",
+      "sources": [
+        {
+          "path": "Mac/Preferences/General/Base.lproj/GeneralPreferencesView.xib",
+          "line": 28,
+          "end_line": 213
+        }
+      ]
+    },
+    {
+      "id": "pref_general",
+      "label": "通用设置",
+      "parent": "prefs",
+      "sublabel": "启动、刷新等基础项",
+      "sources": [
+        {
+          "path": "Mac/Preferences/General/Base.lproj/GeneralPreferencesView.xib",
+          "line": 28,
+          "end_line": 213
+        }
+      ]
+    },
+    {
+      "id": "pref_appearance",
+      "label": "外观设置",
+      "parent": "prefs",
+      "sublabel": "主题与文章字号",
+      "sources": [
+        {
+          "path": "Mac/Preferences/Appearance/Base.lproj/AppearancePreferencesView.xib",
+          "line": 33,
+          "end_line": 219
+        }
+      ]
+    },
+    {
+      "id": "pref_timeline",
+      "label": "时间线设置",
+      "parent": "prefs",
+      "sublabel": "列、排序与布局",
+      "sources": [
+        {
+          "path": "Mac/Preferences/Timeline/Base.lproj/TimelinePreferencesView.xib",
+          "line": 34,
+          "end_line": 232
+        }
+      ]
+    },
+    {
+      "id": "pref_ai",
+      "label": "AI 设置",
+      "parent": "prefs",
+      "sublabel": "网关、模型与 Key",
+      "sources": [
+        {
+          "path": "Mac/Preferences/AI/AIPreferencesViewController.swift",
+          "line": 35,
+          "end_line": 90
+        }
+      ]
+    },
+    {
+      "id": "pref_accounts",
+      "label": "账户设置",
+      "parent": "prefs",
+      "sublabel": "账户详情与行为",
+      "sources": [
+        {
+          "path": "Mac/Preferences/Accounts/AccountsDetailView.swift",
+          "line": 41,
+          "end_line": 97
+        }
+      ]
+    },
+    {
+      "id": "pref_advanced",
+      "label": "高级设置",
+      "parent": "prefs",
+      "sublabel": "数据库与诊断选项",
+      "sources": [
+        {
+          "path": "Mac/Preferences/Advanced/Base.lproj/AdvancedPreferencesView.xib",
+          "line": 26,
+          "end_line": 122
+        }
+      ]
+    },
+    {
+      "id": "diagnostics",
+      "label": "诊断与工具",
+      "parent": "nnw",
+      "sublabel": "日志、统计与清理",
+      "sources": [
+        {
+          "path": "Mac/MainMenu/Base.lproj/MainMenu.xib",
+          "line": 660
+        }
+      ]
+    },
+    {
+      "id": "diag_logs",
+      "label": "活动与错误日志",
+      "parent": "diagnostics",
+      "sublabel": "两个日志窗口",
+      "sources": [
+        {
+          "path": "Mac/MainMenu/Base.lproj/MainMenu.xib",
+          "line": 660,
+          "end_line": 665
+        }
+      ]
+    },
+    {
+      "id": "diag_dino",
+      "label": "恐龙窗口",
+      "parent": "diagnostics",
+      "sublabel": "久未更新的订阅",
+      "sources": [
+        {
+          "path": "Mac/Dinosaurs/DinosaursWindowController.swift",
+          "line": 28,
+          "end_line": 34
+        }
+      ]
+    },
+    {
+      "id": "diag_stats",
+      "label": "账户统计",
+      "parent": "diagnostics",
+      "sublabel": "订阅、文章与库大小",
+      "sources": [
+        {
+          "path": "Shared/AccountStats/AccountStatsViewModel.swift",
+          "line": 25,
+          "end_line": 45
+        }
+      ]
+    },
+    {
+      "id": "diag_icloud",
+      "label": "iCloud 统计清理",
+      "parent": "diagnostics",
+      "sublabel": "记录统计与清理",
+      "sources": [
+        {
+          "path": "Mac/CloudKitStats/CloudKitStatsViewController.swift",
+          "line": 96,
+          "end_line": 107
+        }
+      ]
+    },
+    {
+      "id": "diag_activity",
+      "label": "当前活动窗口",
+      "parent": "diagnostics",
+      "sublabel": "正在进行的任务",
+      "sources": [
+        {
+          "path": "Shared/CurrentActivity/CurrentActivityViewModel.swift",
+          "line": 86,
+          "end_line": 98
+        }
+      ]
+    },
+    {
+      "id": "diag_data",
+      "label": "数据目录",
+      "parent": "diagnostics",
+      "sublabel": "Application Support",
+      "sources": [
+        {
+          "path": "Modules/RSCore/Sources/RSCore/AppConfig.swift",
+          "line": 36,
+          "end_line": 46
+        }
+      ]
+    }
+  ]
+}

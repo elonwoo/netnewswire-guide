@@ -1,0 +1,526 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "NetNewsWire 搜索索引",
+    "subtitle": "写入侧入库即建索引，查询侧两种范围走同一张表",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "netnewswire-search-index.html",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310"
+    }
+  },
+  "lanes": [
+    {
+      "id": "write",
+      "label": "写入侧：文章入库时建索引"
+    },
+    {
+      "id": "exc",
+      "label": "异常与回退",
+      "variant": "exception"
+    },
+    {
+      "id": "query",
+      "label": "查询侧：用户搜索时走索引"
+    },
+    {
+      "id": "external",
+      "label": "对外索引"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ingest",
+      "lane": "write",
+      "col": 0,
+      "type": "backend",
+      "label": "文章入库",
+      "sublabel": "insert / update 完成后接着建索引",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 210,
+          "end_line": 284
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 329,
+          "end_line": 338
+        }
+      ]
+    },
+    {
+      "id": "strip",
+      "lane": "write",
+      "col": 1,
+      "type": "backend",
+      "label": "抽取索引文本",
+      "sublabel": "标题 / 正文 / 作者，剥 HTML 再归一化",
+      "yOffset": -40,
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/SearchTable.swift",
+          "line": 25,
+          "end_line": 56
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/SearchTable.swift",
+          "line": 235,
+          "end_line": 246
+        }
+      ]
+    },
+    {
+      "id": "retain",
+      "lane": "write",
+      "col": 1,
+      "type": "database",
+      "label": "删 30 天旧文",
+      "sublabel": "非星标且不在当前 feed",
+      "yOffset": 100,
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 253,
+          "end_line": 262
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 451,
+          "end_line": 453
+        }
+      ]
+    },
+    {
+      "id": "fts",
+      "lane": "write",
+      "col": 2,
+      "type": "database",
+      "label": "写入 FTS4 表",
+      "sublabel": "search(title, body)，行号回填",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/SearchTable.swift",
+          "line": 138,
+          "end_line": 147
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 442,
+          "end_line": 454
+        }
+      ]
+    },
+    {
+      "id": "rowid",
+      "lane": "write",
+      "col": 3,
+      "type": "database",
+      "label": "回写 searchRowID",
+      "sublabel": "articles 行记住搜索行号",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/SearchTable.swift",
+          "line": 138,
+          "end_line": 141
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 75,
+          "end_line": 77
+        }
+      ]
+    },
+    {
+      "id": "searchbox",
+      "lane": "query",
+      "col": 0,
+      "type": "frontend",
+      "label": "工具栏搜索框",
+      "sublabel": "输入即搜，空串结束搜索",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 994,
+          "end_line": 1001
+        },
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 1407,
+          "end_line": 1414
+        }
+      ]
+    },
+    {
+      "id": "smartfeed",
+      "lane": "query",
+      "col": 1,
+      "type": "backend",
+      "label": "临时智能订阅",
+      "sublabel": "SearchFeedDelegate，切到 search 模式",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 1012,
+          "end_line": 1024
+        },
+        {
+          "path": "Shared/SmartFeeds/SearchFeedDelegate.swift",
+          "line": 16,
+          "end_line": 39
+        }
+      ]
+    },
+    {
+      "id": "scopeGlobal",
+      "lane": "query",
+      "col": 2,
+      "type": "backend",
+      "label": "全局范围",
+      "sublabel": "整个账户全部 feed",
+      "yOffset": -50,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 822,
+          "end_line": 844
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 146,
+          "end_line": 150
+        }
+      ]
+    },
+    {
+      "id": "scopeList",
+      "lane": "query",
+      "col": 2,
+      "type": "backend",
+      "label": "当前列表范围",
+      "sublabel": "只查当前时间线里的 articleID",
+      "yOffset": 70,
+      "sources": [
+        {
+          "path": "Shared/SmartFeeds/SearchTimelineFeedDelegate.swift",
+          "line": 31,
+          "end_line": 34
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 842,
+          "end_line": 843
+        }
+      ]
+    },
+    {
+      "id": "match",
+      "lane": "query",
+      "col": 3,
+      "type": "database",
+      "label": "FTS4 前缀匹配",
+      "sublabel": "每个词尾加 *，取 rowid 集合",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 761,
+          "end_line": 771
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 779,
+          "end_line": 792
+        }
+      ]
+    },
+    {
+      "id": "materialize",
+      "lane": "query",
+      "col": 4,
+      "type": "database",
+      "label": "按行号回表",
+      "sublabel": "searchRowID in (...) 取文章",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 773,
+          "end_line": 777
+        }
+      ],
+      "yOffset": -40
+    },
+    {
+      "id": "timeline",
+      "lane": "query",
+      "col": 4,
+      "type": "frontend",
+      "label": "搜索结果时间线",
+      "sublabel": "独立 search 时间线渲染",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineContainerViewController.swift",
+          "line": 136,
+          "end_line": 143
+        },
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 1020,
+          "end_line": 1021
+        }
+      ],
+      "yOffset": 60
+    },
+    {
+      "id": "spotlight",
+      "lane": "external",
+      "col": 4,
+      "type": "external",
+      "label": "Spotlight 活动索引",
+      "sublabel": "CSSearchableIndex，与 FTS 互不相干",
+      "sources": [
+        {
+          "path": "Shared/Activity/ActivityManager.swift",
+          "line": 295,
+          "end_line": 306
+        },
+        {
+          "path": "Shared/Activity/ActivityManager.swift",
+          "line": 238,
+          "end_line": 266
+        }
+      ]
+    },
+    {
+      "id": "rebuild",
+      "lane": "exc",
+      "col": 1,
+      "type": "backend",
+      "label": "迁移与补索引",
+      "sublabel": "加列后启动补建，每批 500",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 62,
+          "end_line": 108
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 536,
+          "end_line": 552
+        }
+      ]
+    },
+    {
+      "id": "fallback",
+      "lane": "exc",
+      "col": 2,
+      "type": "backend",
+      "label": "索引行缺失",
+      "sublabel": "行号指向空行时当场重做",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/SearchTable.swift",
+          "line": 167,
+          "end_line": 210
+        }
+      ]
+    },
+    {
+      "id": "empty",
+      "lane": "exc",
+      "col": 3,
+      "type": "backend",
+      "label": "无匹配",
+      "sublabel": "rowid 为空，返回空集合",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 761,
+          "end_line": 771
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "ingest",
+      "to": "strip",
+      "role": "main",
+      "label": "新文章 / 更新文章"
+    },
+    {
+      "id": "e2",
+      "from": "ingest",
+      "to": "retain",
+      "role": "branch",
+      "label": "deleteOlder 时"
+    },
+    {
+      "id": "e3",
+      "from": "strip",
+      "to": "fts",
+      "role": "main",
+      "label": "body + title"
+    },
+    {
+      "id": "e4",
+      "from": "retain",
+      "to": "fts",
+      "role": "branch",
+      "label": "触发器删 search 行"
+    },
+    {
+      "id": "e5",
+      "from": "fts",
+      "to": "rowid",
+      "role": "main",
+      "label": "lastInsertRowId"
+    },
+    {
+      "id": "e6",
+      "from": "searchbox",
+      "to": "smartfeed",
+      "role": "main",
+      "label": "runSearch"
+    },
+    {
+      "id": "e7",
+      "from": "smartfeed",
+      "to": "scopeGlobal",
+      "role": "main",
+      "label": ".search"
+    },
+    {
+      "id": "e8",
+      "from": "smartfeed",
+      "to": "scopeList",
+      "role": "branch",
+      "label": ".searchWithArticleIDs"
+    },
+    {
+      "id": "e9",
+      "from": "scopeGlobal",
+      "to": "match",
+      "role": "main"
+    },
+    {
+      "id": "e10",
+      "from": "scopeList",
+      "to": "match",
+      "role": "branch"
+    },
+    {
+      "id": "e11",
+      "from": "match",
+      "to": "materialize",
+      "role": "main",
+      "label": "searchRowID 集合"
+    },
+    {
+      "id": "e12",
+      "from": "materialize",
+      "to": "timeline",
+      "role": "main"
+    },
+    {
+      "id": "e13",
+      "from": "match",
+      "to": "fts",
+      "role": "branch",
+      "variant": "dashed",
+      "label": "读同一张 search 表"
+    },
+    {
+      "id": "e14",
+      "from": "fts",
+      "to": "fallback",
+      "role": "error",
+      "label": "search 行不在"
+    },
+    {
+      "id": "e15",
+      "from": "fallback",
+      "to": "fts",
+      "role": "return",
+      "label": "重建该条"
+    },
+    {
+      "id": "e16",
+      "from": "match",
+      "to": "empty",
+      "role": "error",
+      "label": "无匹配"
+    },
+    {
+      "id": "e17",
+      "from": "empty",
+      "to": "timeline",
+      "role": "return",
+      "label": "空时间线"
+    },
+    {
+      "id": "e18",
+      "from": "rebuild",
+      "to": "strip",
+      "role": "branch",
+      "label": "searchRowID 为空"
+    },
+    {
+      "id": "e19",
+      "from": "timeline",
+      "to": "spotlight",
+      "role": "async",
+      "label": "选中文章时 donate"
+    }
+  ],
+  "mainPath": [
+    "ingest",
+    "strip",
+    "fts",
+    "rowid"
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "索引里到底有什么",
+      "items": [
+        "每条只存两份文本：标题与正文，正文后面拼上作者名，全是剥完 HTML 的纯文本",
+        "正文优先取 contentHTML，没有就退回 contentText 或 summary，先解码实体再剥标签",
+        "归一化把标点和符号换成空格再压缩空白，免得 FTS4 分词器把非 ASCII 标点当词字符（issue #3531）"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "两种查询范围",
+      "items": [
+        "全局：FetchType.search，范围是整个账户的 feedIDs，Mac 工具栏搜索框走这条",
+        "当前列表内：FetchType.searchWithArticleIDs，把候选限定在当前时间线的 articleID 里",
+        "两个范围最后都落到同一条 FTS4 查询，只是过滤条件不同"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "索引坏了怎么回来",
+      "items": [
+        "searchRowID 为空的文章，启动时每批 500 条补建，直到查不到空值",
+        "searchRowID 有值但 search 表里那行不见了，写索引时当场重做这一条",
+        "schema 迁移只加 searchRowID 列和索引，旧库靠补建自己长齐"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Spotlight 是另一套",
+      "items": [
+        "选中文章时 donate 一条 NSUserActivity，走系统活动与 Spotlight 通道",
+        "CSSearchableIndex 只认活动自带的属性集，和 FTS4 表没有数据往来",
+        "文章搜索属性在 ActivityManager 的 iOS 分支里构建，Mac 上只做 Handoff 转交"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,406 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "NetNewsWire 刷新管线",
+    "locale": "zh-CN",
+    "subtitle": "从一次刷新触发到新文章出现在时间线",
+    "quality_profile": "showcase",
+    "output": ".archify/workflow-netnewswire-refresh-20261116-220213/netnewswire-refresh.html",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310"
+    }
+  },
+  "lanes": [
+    {
+      "id": "ui",
+      "label": "界面"
+    },
+    {
+      "id": "account",
+      "label": "账户调度"
+    },
+    {
+      "id": "local",
+      "label": "本机抓取与解析"
+    },
+    {
+      "id": "exc",
+      "label": "失败与降级",
+      "variant": "exception"
+    },
+    {
+      "id": "remote",
+      "label": "服务端账户"
+    },
+    {
+      "id": "store",
+      "label": "本地存储"
+    }
+  ],
+  "phases": [
+    {
+      "id": "kickoff",
+      "label": "触发",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "fetch",
+      "label": "分账户抓取",
+      "fromCol": 2,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "landing",
+      "label": "写库与显示",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "trigger",
+    "refreshall",
+    "dispatch",
+    "download",
+    "parser",
+    "db"
+  ],
+  "nodes": [
+    {
+      "id": "trigger",
+      "lane": "ui",
+      "col": 0,
+      "type": "frontend",
+      "label": "刷新触发",
+      "sublabel": "菜单 / 定时器 / 前台",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 642,
+          "end_line": 644
+        },
+        {
+          "path": "Shared/Timer/AccountRefreshTimer.swift",
+          "line": 88,
+          "end_line": 106
+        }
+      ]
+    },
+    {
+      "id": "timeline",
+      "lane": "ui",
+      "col": 5,
+      "type": "frontend",
+      "label": "时间线合并",
+      "sublabel": "按 articleID 增量合并",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineViewController.swift",
+          "line": 911,
+          "end_line": 920
+        },
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineViewController.swift",
+          "line": 1451,
+          "end_line": 1472
+        }
+      ]
+    },
+    {
+      "id": "refreshall",
+      "lane": "account",
+      "col": 1,
+      "type": "backend",
+      "label": "全量刷新调度",
+      "sublabel": "联网检查 → 并行各账户",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/AccountManager.swift",
+          "line": 324,
+          "end_line": 348
+        }
+      ]
+    },
+    {
+      "id": "dispatch",
+      "lane": "account",
+      "col": 2,
+      "type": "backend",
+      "label": "Account 分派",
+      "sublabel": "按账户类型选 delegate",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 299,
+          "end_line": 319
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 472,
+          "end_line": 474
+        }
+      ]
+    },
+    {
+      "id": "download",
+      "lane": "local",
+      "col": 3,
+      "type": "backend",
+      "label": "DownloadSession",
+      "sublabel": "条件 GET · 429/4xx 跳过",
+      "sources": [
+        {
+          "path": "Modules/RSWeb/Sources/RSWeb/DownloadSession.swift",
+          "line": 124,
+          "end_line": 140
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 196
+        }
+      ]
+    },
+    {
+      "id": "parser",
+      "lane": "local",
+      "col": 4,
+      "type": "backend",
+      "label": "FeedParser",
+      "sublabel": "RSS / Atom / JSON",
+      "tag": "contentHash 不变则跳过",
+      "sources": [
+        {
+          "path": "Modules/RSParser/Sources/RSParser/Feeds/FeedParser.swift",
+          "line": 44,
+          "end_line": 71
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 388,
+          "end_line": 397
+        }
+      ]
+    },
+    {
+      "id": "remoteapi",
+      "lane": "remote",
+      "col": 3,
+      "type": "cloud",
+      "label": "Feedbin / Feedly",
+      "sublabel": "分页拉条目",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAPICaller.swift",
+          "line": 307,
+          "end_line": 351
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Feedly/FeedlyAccountDelegate.swift",
+          "line": 1114,
+          "end_line": 1142
+        }
+      ]
+    },
+    {
+      "id": "mapitems",
+      "lane": "remote",
+      "col": 4,
+      "type": "backend",
+      "label": "条目映射",
+      "sublabel": "JSON → ParsedItem",
+      "tag": "不经过解析器",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift",
+          "line": 972,
+          "end_line": 990
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Feedly/FeedlyModel.swift",
+          "line": 199,
+          "end_line": 233
+        }
+      ]
+    },
+    {
+      "id": "db",
+      "lane": "store",
+      "col": 5,
+      "type": "database",
+      "label": "ArticlesDatabase",
+      "sublabel": "SQLite · 按 articleID 去重",
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 210,
+          "end_line": 284
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 971,
+          "end_line": 986
+        }
+      ]
+    },
+    {
+      "id": "offline",
+      "lane": "exc",
+      "col": 1,
+      "type": "security",
+      "label": "未联网",
+      "sublabel": "整轮跳过",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/AccountManager.swift",
+          "line": 325,
+          "end_line": 328
+        }
+      ]
+    },
+    {
+      "id": "fail",
+      "lane": "exc",
+      "col": 4,
+      "type": "security",
+      "label": "单 feed 失败",
+      "sublabel": "RSSHub 回退 · 不重试",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 315,
+          "end_line": 380
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 429,
+          "end_line": 443
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "start-refresh",
+      "from": "trigger",
+      "to": "refreshall",
+      "label": "刷新",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "refresh-dispatch",
+      "from": "refreshall",
+      "to": "dispatch",
+      "role": "main"
+    },
+    {
+      "id": "dispatch-local",
+      "from": "dispatch",
+      "to": "download",
+      "label": "本地 / CloudKit",
+      "role": "main"
+    },
+    {
+      "id": "dispatch-remote",
+      "from": "dispatch",
+      "to": "remoteapi",
+      "label": "Feedbin / Feedly",
+      "role": "branch"
+    },
+    {
+      "id": "download-parse",
+      "from": "download",
+      "to": "parser",
+      "role": "main"
+    },
+    {
+      "id": "parse-store",
+      "from": "parser",
+      "to": "db",
+      "label": "ParsedFeed",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "remote-map",
+      "from": "remoteapi",
+      "to": "mapitems",
+      "role": "branch"
+    },
+    {
+      "id": "map-store",
+      "from": "mapitems",
+      "to": "db",
+      "label": "ParsedItem",
+      "role": "branch"
+    },
+    {
+      "id": "parse-fail",
+      "from": "parser",
+      "to": "fail",
+      "variant": "security",
+      "role": "error",
+      "label": "解析失败"
+    },
+    {
+      "id": "refresh-offline",
+      "from": "refreshall",
+      "to": "offline",
+      "label": "未联网",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "store-timeline",
+      "from": "db",
+      "to": "timeline",
+      "variant": "emphasis",
+      "role": "return",
+      "label": "通知"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "两条抓取路径",
+      "items": [
+        "onMyMac 与 CloudKit 的 feed 内容由本机 DownloadSession 下载、FeedParser 解析",
+        "Feedbin / Feedly / ReaderAPI / NewsBlur 只拉服务端已解析条目，映射成 ParsedItem，不跑解析器",
+        "CloudKit 两边都占：先同步 CloudKit 变更，再复用本机抓取链路"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "入库与保留",
+      "items": [
+        "新增判定是 articleID 查不到旧行；已有行只在字段变化时更新",
+        "feedBased 账户（onMyMac / CloudKit）删除 30 天前且不在订阅里的非星标文章",
+        "syncSystem 账户不做保留期删除，交给服务端"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "写库之后",
+      "items": [
+        "Account 写库后 post .AccountDidDownloadArticles，携带新增与更新的 feed",
+        "时间线只在当前列表包含这些 feed 时重新取并合并，合并按 articleID 保留旧文章",
+        "未读数与刷新进度走 .AccountRefreshDidBegin / DidFinish，不触发列表重载"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "失败与限流",
+      "items": [
+        "解析失败只记 ActivityLog 与错误提示，不重试；2xx 但解析不出 feed 视为无变化",
+        "DownloadSession 对 429 / 4xx 在本进程内短期跳过，连接类错误不更新 lastCheckDate",
+        "Feedly 与 ReaderAPI 在限流窗口内直接跳过本轮；ReaderAPI 凭据过期只重试一次"
+      ]
+    }
+  ]
+}

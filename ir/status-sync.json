@@ -1,0 +1,258 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "NetNewsWire 已读与星标的状态回写",
+    "subtitle": "从一次标记到本地库、远端服务与界面刷新",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "netnewswire-status-sync.html",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310"
+    }
+  },
+  "lanes": [
+    { "id": "ui", "label": "界面" },
+    { "id": "cmd", "label": "命令与账户调度" },
+    { "id": "store", "label": "本地库" },
+    { "id": "queue", "label": "远端账户队列" },
+    { "id": "remote", "label": "远端服务" },
+    { "id": "exc", "label": "失败、撤销与断网", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "mark", "label": "发起标记", "fromCol": 0, "toCol": 1 },
+    { "id": "write", "label": "写库与分账户", "fromCol": 2, "toCol": 3 },
+    { "id": "sync", "label": "排队、上行与刷新", "fromCol": 4, "toCol": 5, "variant": "emphasis" }
+  ],
+  "mainPath": [
+    "usermark",
+    "command",
+    "dispatch",
+    "dbwrite",
+    "enqueue",
+    "sender",
+    "remoteok"
+  ],
+  "nodes": [
+    {
+      "id": "usermark",
+      "lane": "ui",
+      "col": 0,
+      "type": "frontend",
+      "label": "标记已读 / 星标",
+      "sublabel": "时间线右键或菜单",
+      "sources": [
+        { "path": "Mac/MainWindow/Timeline/TimelineViewController+ContextualMenus.swift", "line": 150, "end_line": 170 },
+        { "path": "Mac/MainWindow/Timeline/TimelineViewController+ContextualMenus.swift", "line": 120, "end_line": 134 }
+      ]
+    },
+    {
+      "id": "command",
+      "lane": "cmd",
+      "col": 1,
+      "type": "backend",
+      "label": "MarkStatusCommand",
+      "sublabel": "可撤销，按 accountID 分组",
+      "sources": [
+        { "path": "Shared/Commands/MarkStatusCommand.swift", "line": 15, "end_line": 46 },
+        { "path": "Shared/Commands/MarkStatusCommand.swift", "line": 56, "end_line": 64 },
+        { "path": "Shared/Commands/MarkStatusCommand.swift", "line": 95, "end_line": 108 }
+      ]
+    },
+    {
+      "id": "dispatch",
+      "lane": "cmd",
+      "col": 2,
+      "type": "backend",
+      "label": "分账户派发",
+      "sublabel": "Account → AccountDelegate",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/Account.swift", "line": 599, "end_line": 601 },
+        { "path": "Shared/Extensions/ArticleUtilities.swift", "line": 17, "end_line": 36 }
+      ]
+    },
+    {
+      "id": "dbwrite",
+      "lane": "store",
+      "col": 3,
+      "type": "database",
+      "label": "updateStatusesAsync",
+      "sublabel": "写 statuses 表，只返回变化 ID",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/Account.swift", "line": 973, "end_line": 985 },
+        { "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift", "line": 386, "end_line": 392 },
+        { "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/StatusesTable.swift", "line": 310, "end_line": 318 }
+      ]
+    },
+    {
+      "id": "localdone",
+      "lane": "store",
+      "col": 4,
+      "type": "database",
+      "label": "本机账户：到此为止",
+      "sublabel": "sendArticleStatus 空实现",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift", "line": 146, "end_line": 148 },
+        { "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift", "line": 60, "end_line": 68 }
+      ]
+    },
+    {
+      "id": "enqueue",
+      "lane": "queue",
+      "col": 4,
+      "type": "messagebus",
+      "label": "SyncStatus 入队",
+      "sublabel": "syncStatus 表 + 变更通知",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift", "line": 453, "end_line": 471 },
+        { "path": "Modules/SyncDatabase/Sources/SyncDatabase/SyncStatusTable.swift", "line": 141, "end_line": 155 },
+        { "path": "Modules/SyncDatabase/Sources/SyncDatabase/SyncDatabase.swift", "line": 36, "end_line": 38 }
+      ]
+    },
+    {
+      "id": "sender",
+      "lane": "queue",
+      "col": 5,
+      "type": "backend",
+      "label": "后台批量发送",
+      "sublabel": "定时器 2 分钟 / 阈值 flush",
+      "sources": [
+        { "path": "Shared/Timer/ArticleStatusSyncTimer.swift", "line": 80, "end_line": 105 },
+        { "path": "Modules/Account/Sources/Account/AccountManager.swift", "line": 369, "end_line": 385 }
+      ]
+    },
+    {
+      "id": "remoteok",
+      "lane": "remote",
+      "col": 5,
+      "type": "cloud",
+      "label": "服务端确认",
+      "sublabel": "成功即删 selected 行",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift", "line": 110, "end_line": 162 },
+        { "path": "Modules/Account/Sources/Account/CloudKit/CloudKitAccountDelegate.swift", "line": 1137, "end_line": 1155 }
+      ]
+    },
+    {
+      "id": "notify",
+      "lane": "ui",
+      "col": 4,
+      "type": "frontend",
+      "label": "StatusesDidChange",
+      "sublabel": "可见行增量重载",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/Account.swift", "line": 1530, "end_line": 1538 },
+        { "path": "Mac/MainWindow/Timeline/TimelineViewController.swift", "line": 786, "end_line": 792 }
+      ]
+    },
+    {
+      "id": "counts",
+      "lane": "ui",
+      "col": 5,
+      "type": "frontend",
+      "label": "未读数与 Dock 角标",
+      "sublabel": "侧边栏 / 状态栏 / 角标",
+      "sources": [
+        { "path": "Mac/AppDelegate.swift", "line": 579, "end_line": 583 },
+        { "path": "Mac/MainWindow/Sidebar/SidebarViewController.swift", "line": 228, "end_line": 236 },
+        { "path": "Modules/Account/Sources/Account/UnreadCountProvider.swift", "line": 13, "end_line": 19 }
+      ]
+    },
+    {
+      "id": "undo",
+      "lane": "exc",
+      "col": 1,
+      "type": "backend",
+      "label": "撤销 / 重做",
+      "sublabel": "undo() 用相反 flag 再走一遍",
+      "sources": [
+        { "path": "Shared/Commands/MarkStatusCommand.swift", "line": 56, "end_line": 64 },
+        { "path": "Mac/MainWindow/Timeline/TimelineViewController+ContextualMenus.swift", "line": 128, "end_line": 134 }
+      ]
+    },
+    {
+      "id": "sendfail",
+      "lane": "exc",
+      "col": 5,
+      "type": "backend",
+      "label": "上行失败：退回队列",
+      "sublabel": "reset selected，下轮重试",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift", "line": 800, "end_line": 810 },
+        { "path": "Modules/SyncDatabase/Sources/SyncDatabase/SyncStatusTable.swift", "line": 105, "end_line": 121 }
+      ]
+    },
+    {
+      "id": "offline",
+      "lane": "exc",
+      "col": 3,
+      "type": "external",
+      "label": "断网 / 服务不可达",
+      "sublabel": "标记照常成功，队列累积",
+      "sources": [
+        { "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift", "line": 153, "end_line": 161 },
+        { "path": "Shared/Timer/ArticleStatusSyncTimer.swift", "line": 15, "end_line": 16 }
+      ]
+    }
+  ],
+  "edges": [
+    { "id": "e-user-command", "from": "usermark", "to": "command", "label": "runCommand", "role": "main" },
+    { "id": "e-command-dispatch", "from": "command", "to": "dispatch", "label": "perform()", "role": "main" },
+    { "id": "e-dispatch-write", "from": "dispatch", "to": "dbwrite", "label": "markArticles", "role": "main" },
+    { "id": "e-write-local", "from": "dbwrite", "to": "localdone", "label": "本机账户", "role": "branch" },
+    { "id": "e-write-queue", "from": "dbwrite", "to": "enqueue", "label": "远端账户", "role": "main" },
+    { "id": "e-queue-send", "from": "enqueue", "to": "sender", "label": "待发队列", "role": "main" },
+    { "id": "e-send-remote", "from": "sender", "to": "remoteok", "label": "HTTP / CloudKit", "role": "main" },
+    { "id": "e-write-notify", "from": "dbwrite", "to": "notify", "label": "状态通知", "role": "branch" },
+    { "id": "e-notify-counts", "from": "notify", "to": "counts", "label": "重算未读", "role": "branch" },
+    { "id": "e-send-fail", "from": "sender", "to": "sendfail", "label": "发送失败", "role": "error" },
+    { "id": "e-fail-retry", "from": "sendfail", "to": "enqueue", "label": "退回待发", "role": "return" },
+    { "id": "e-offline-queue", "from": "offline", "to": "enqueue", "label": "仍可入队", "role": "async" },
+    { "id": "e-undo-command", "from": "undo", "to": "command", "label": "反向标记", "role": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "队列阈值与批次",
+      "items": [
+        "只有真正变化的 articleID 才入队：updateStatusesAsync 返回空集时不写 syncStatus 行",
+        "待发数量超过 100 时后台立即 flush；Feedly 用 pendingStatusSendThreshold，并受限于限流器",
+        "后台定时器常规 2 分钟一轮；整轮无事可做时退避到 30 分钟，新入队通知会把它拉回常规节奏",
+        "Feedbin 按 1000 个 ID 分块发送，每块成功后才 deleteSelectedForProcessing"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "各服务差异",
+      "items": [
+        "Feedbin：未读与星标拆成 create / delete 四个端点，某个端点失败仍继续发其余端点",
+        "Feedly 与 ReaderAPI：限流时直接跳过本轮（rateLimiter.shouldSkip），队列保留不清空；Inoreader 只发不收",
+        "CloudKit：交给 CloudKitSendStatusOperation 写 CKRecord，部分失败也会返回 didFail，重试靠下一轮同步",
+        "本机账户 syncArticleStatus 返回 false、sendArticleStatus 为空实现，所以永远不上行"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "撤销与去重",
+      "items": [
+        "MarkStatusCommand 是 UndoableCommand：undo() 用相反 flag 再走同一条链路，redo 同理",
+        "构造时先过滤已符合状态的文章；已读改未读还要求 isAvailableToMarkUnread",
+        "SQL 只在 flag 不同时更新，返回的 changedArticleIDs 才是入队依据",
+        "syncStatus 主键是 (articleID, key)，insert 用 orReplace，同一篇的已读行与星标行互不覆盖"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "断网与重试",
+      "items": [
+        "发送失败的块 resetSelectedForProcessing 把 selected 置回 false，行留在队列等下一轮",
+        "发送成功的块才 deleteSelectedForProcessing 删除 selected 行",
+        "应用启动时 resetAllSelectedForProcessing 清掉上次发送中途退出的残留",
+        "断网期间标记仍然成功：本地库先落盘，远端队列只累积，界面先刷新"
+      ]
+    }
+  ]
+}

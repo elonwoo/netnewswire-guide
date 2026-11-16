@@ -1,0 +1,660 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "NetNewsWire 添加订阅",
+    "locale": "zh-CN",
+    "subtitle": "从新建订阅入口到订阅出现在侧边栏并能被抓取",
+    "quality_profile": "showcase",
+    "output": "netnewswire-subscribe.html",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310"
+    }
+  },
+  "lanes": [
+    {
+      "id": "entry",
+      "label": "入口与校验"
+    },
+    {
+      "id": "exc",
+      "label": "失败与前提",
+      "variant": "exception"
+    },
+    {
+      "id": "local",
+      "label": "本机 feed 解析"
+    },
+    {
+      "id": "remote",
+      "label": "服务端账户"
+    },
+    {
+      "id": "account",
+      "label": "账户写入"
+    },
+    {
+      "id": "refresh",
+      "label": "首次抓取"
+    },
+    {
+      "id": "output",
+      "label": "侧边栏"
+    },
+    {
+      "id": "batch",
+      "label": "批量导入"
+    }
+  ],
+  "phases": [
+    {
+      "id": "input",
+      "label": "入口与校验",
+      "fromCol": 0,
+      "toCol": 2
+    },
+    {
+      "id": "resolve",
+      "label": "发现与分派",
+      "fromCol": 3,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "landing",
+      "label": "写入与呈现",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "entry",
+    "sheet",
+    "normalize",
+    "dup",
+    "dispatch",
+    "finder",
+    "persist",
+    "sidebar"
+  ],
+  "nodes": [
+    {
+      "id": "entry",
+      "lane": "entry",
+      "col": 0,
+      "type": "frontend",
+      "icon": "start",
+      "label": "新建订阅入口",
+      "sublabel": "菜单 ⌘N · 工具栏 +",
+      "sources": [
+        {
+          "path": "Mac/MainMenu/Base.lproj/MainMenu.xib",
+          "line": 84,
+          "end_line": 87
+        },
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 2389,
+          "end_line": 2403
+        },
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 646,
+          "end_line": 649
+        }
+      ]
+    },
+    {
+      "id": "sheet",
+      "lane": "entry",
+      "col": 1,
+      "type": "frontend",
+      "label": "添加订阅面板",
+      "sublabel": "URL · 可选标题 · 账户与文件夹",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedWindowController.swift",
+          "line": 70,
+          "end_line": 82
+        },
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedWindowController.swift",
+          "line": 93,
+          "end_line": 111
+        },
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedWindowController.swift",
+          "line": 139,
+          "end_line": 144
+        }
+      ]
+    },
+    {
+      "id": "normalize",
+      "lane": "entry",
+      "col": 2,
+      "type": "backend",
+      "label": "URL 规范化与校验",
+      "sublabel": "剥 feed: 前缀 · 补全 http(s)",
+      "tag": "mayBeURL 才可提交",
+      "sources": [
+        {
+          "path": "Modules/RSCore/Sources/RSCore/String+RSCore.swift",
+          "line": 165,
+          "end_line": 205
+        },
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedWindowController.swift",
+          "line": 93,
+          "end_line": 104
+        }
+      ]
+    },
+    {
+      "id": "dup",
+      "lane": "entry",
+      "col": 3,
+      "type": "backend",
+      "icon": "decision",
+      "label": "提交前查重",
+      "sublabel": "existingFeed(withURL:)",
+      "tag": "按目标账户判断",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedController.swift",
+          "line": 59,
+          "end_line": 62
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 204,
+          "end_line": 206
+        }
+      ]
+    },
+    {
+      "id": "dispatch",
+      "lane": "account",
+      "col": 3,
+      "type": "backend",
+      "label": "Account.createFeed",
+      "sublabel": "按账户类型转给 delegate",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 697,
+          "end_line": 706
+        },
+        {
+          "path": "Modules/Account/Sources/Account/AccountDelegate.swift",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "id": "finder",
+      "lane": "local",
+      "col": 4,
+      "type": "backend",
+      "label": "FeedFinder 定位 feed",
+      "sublabel": "直链 / HTML link / 重定向",
+      "tag": "micro.blog 404 特例",
+      "sources": [
+        {
+          "path": "Modules/FeedFinder/Sources/FeedFinder/FeedFinder.swift",
+          "line": 52,
+          "end_line": 95
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 197,
+          "end_line": 211
+        },
+        {
+          "path": "Modules/Account/Sources/Account/CloudKit/CloudKitAccountDelegate.swift",
+          "line": 938,
+          "end_line": 981
+        }
+      ]
+    },
+    {
+      "id": "remote_add",
+      "lane": "remote",
+      "col": 4,
+      "type": "cloud",
+      "label": "服务端搜索并添加",
+      "sublabel": "Feedbin / Feedly / ReaderAPI",
+      "tag": "返回 created 或 multipleChoice",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift",
+          "line": 319,
+          "end_line": 343
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Feedly/FeedlyAccountDelegate.swift",
+          "line": 596,
+          "end_line": 636
+        }
+      ]
+    },
+    {
+      "id": "persist",
+      "lane": "account",
+      "col": 5,
+      "type": "database",
+      "label": "写入账户树",
+      "sublabel": "addFeedToTreeAtTopLevel",
+      "tag": "structureDidChange 标脏 OPML",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 213,
+          "end_line": 229
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 1098,
+          "end_line": 1102
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 923,
+          "end_line": 929
+        }
+      ]
+    },
+    {
+      "id": "first_fetch",
+      "lane": "refresh",
+      "col": 5,
+      "type": "backend",
+      "label": "首次抓取并入库",
+      "sublabel": "InitialFeedDownloader / refreshAll",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 208,
+          "end_line": 211
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 108,
+          "end_line": 197
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 520,
+          "end_line": 537
+        }
+      ]
+    },
+    {
+      "id": "sidebar",
+      "lane": "output",
+      "col": 5,
+      "type": "frontend",
+      "icon": "success",
+      "label": "侧边栏显示并选中",
+      "sublabel": "UserDidAddFeed → revealAndSelect",
+      "tag": "订阅已可被抓取",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/Sidebar/SidebarViewController.swift",
+          "line": 291,
+          "end_line": 296
+        },
+        {
+          "path": "Mac/MainWindow/Sidebar/SidebarViewController.swift",
+          "line": 1048,
+          "end_line": 1050
+        }
+      ]
+    },
+    {
+      "id": "no_account",
+      "lane": "exc",
+      "col": 0,
+      "type": "security",
+      "label": "未配置账户",
+      "sublabel": "New Feed 菜单禁用",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 503,
+          "end_line": 505
+        },
+        {
+          "path": "Mac/Preferences/Accounts/AddAccountsView.swift",
+          "line": 84,
+          "end_line": 118
+        }
+      ]
+    },
+    {
+      "id": "dup_exc",
+      "lane": "exc",
+      "col": 3,
+      "type": "security",
+      "label": "已存在订阅",
+      "sublabel": "Already added 提示",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedController.swift",
+          "line": 59,
+          "end_line": 62
+        },
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedController.swift",
+          "line": 127,
+          "end_line": 152
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Feedbin/FeedbinAccountDelegate.swift",
+          "line": 334,
+          "end_line": 335
+        }
+      ]
+    },
+    {
+      "id": "notfound_exc",
+      "lane": "exc",
+      "col": 4,
+      "type": "security",
+      "label": "找不到 feed",
+      "sublabel": "Unable to Add Feed",
+      "sources": [
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedController.swift",
+          "line": 73,
+          "end_line": 83
+        },
+        {
+          "path": "Mac/MainWindow/AddFeed/AddFeedController.swift",
+          "line": 165,
+          "end_line": 171
+        },
+        {
+          "path": "Modules/FeedFinder/Sources/FeedFinder/FeedFinder.swift",
+          "line": 63,
+          "end_line": 80
+        }
+      ]
+    },
+    {
+      "id": "wechat",
+      "lane": "batch",
+      "col": 0,
+      "type": "external",
+      "label": "导入微信公众号目录",
+      "sublabel": "内置目录 → 临时 OPML",
+      "tag": "已订阅 URL 先剔除",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 934,
+          "end_line": 953
+        },
+        {
+          "path": "Mac/AI/WeChatCatalogImporter.swift",
+          "line": 51,
+          "end_line": 68
+        },
+        {
+          "path": "Mac/AI/WeChatCatalogImporter.swift",
+          "line": 82,
+          "end_line": 111
+        }
+      ]
+    },
+    {
+      "id": "opml_entry",
+      "lane": "batch",
+      "col": 1,
+      "type": "frontend",
+      "label": "导入 OPML",
+      "sublabel": "选择账户与文件",
+      "sources": [
+        {
+          "path": "Mac/AppDelegate.swift",
+          "line": 703,
+          "end_line": 711
+        },
+        {
+          "path": "Mac/MainWindow/OPML/ImportOPMLWindowController.swift",
+          "line": 59,
+          "end_line": 64
+        },
+        {
+          "path": "Mac/MainWindow/OPML/ImportOPMLWindowController.swift",
+          "line": 86,
+          "end_line": 109
+        }
+      ]
+    },
+    {
+      "id": "opml_parse",
+      "lane": "batch",
+      "col": 3,
+      "type": "backend",
+      "label": "解析并归一化",
+      "sublabel": "OPMLParser + OPMLNormalizer",
+      "tag": "同文件内按 URL 去重",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 520,
+          "end_line": 537
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 595,
+          "end_line": 597
+        },
+        {
+          "path": "Modules/Account/Sources/Account/OPMLNormalizer.swift",
+          "line": 22,
+          "end_line": 62
+        }
+      ]
+    },
+    {
+      "id": "opml_apply",
+      "lane": "batch",
+      "col": 4,
+      "type": "database",
+      "label": "批量写入并落盘",
+      "sublabel": "addOPMLItems + OPMLFile",
+      "tag": "完成后 refreshAll",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 575,
+          "end_line": 592
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 923,
+          "end_line": 929
+        },
+        {
+          "path": "Modules/Account/Sources/Account/OPMLFile.swift",
+          "line": 56,
+          "end_line": 61
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "entry-sheet",
+      "from": "entry",
+      "to": "sheet",
+      "label": "新建订阅",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "entry-no-account",
+      "from": "entry",
+      "to": "no_account",
+      "label": "无活动账户",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "sheet-normalize",
+      "from": "sheet",
+      "to": "normalize",
+      "role": "main"
+    },
+    {
+      "id": "normalize-dup",
+      "from": "normalize",
+      "to": "dup",
+      "role": "main"
+    },
+    {
+      "id": "dup-dispatch",
+      "from": "dup",
+      "to": "dispatch",
+      "label": "未订阅",
+      "role": "main"
+    },
+    {
+      "id": "dup-exception",
+      "from": "dup",
+      "to": "dup_exc",
+      "label": "已有同 URL",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "dispatch-local",
+      "from": "dispatch",
+      "to": "finder",
+      "label": "本机 / CloudKit",
+      "role": "main"
+    },
+    {
+      "id": "dispatch-remote",
+      "from": "dispatch",
+      "to": "remote_add",
+      "label": "Feedbin / Feedly",
+      "role": "branch"
+    },
+    {
+      "id": "finder-persist",
+      "from": "finder",
+      "to": "persist",
+      "label": "选定 feed URL",
+      "role": "main"
+    },
+    {
+      "id": "remote-persist",
+      "from": "remote_add",
+      "to": "persist",
+      "label": "订阅已创建",
+      "role": "branch"
+    },
+    {
+      "id": "finder-notfound",
+      "from": "finder",
+      "to": "notfound_exc",
+      "label": "无 feed",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "persist-sidebar",
+      "from": "persist",
+      "to": "sidebar",
+      "label": "通知并选中",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "persist-fetch",
+      "from": "persist",
+      "to": "first_fetch",
+      "label": "首次下载",
+      "role": "async"
+    },
+    {
+      "id": "fetch-sidebar",
+      "from": "first_fetch",
+      "to": "sidebar",
+      "label": "抓取就绪",
+      "role": "return"
+    },
+    {
+      "id": "opml-entry-parse",
+      "from": "opml_entry",
+      "to": "opml_parse",
+      "label": "OPML 文件",
+      "role": "main"
+    },
+    {
+      "id": "wechat-parse",
+      "from": "wechat",
+      "to": "opml_parse",
+      "label": "临时 OPML",
+      "role": "branch"
+    },
+    {
+      "id": "parse-apply",
+      "from": "opml_parse",
+      "to": "opml_apply",
+      "role": "main"
+    },
+    {
+      "id": "apply-fetch",
+      "from": "opml_apply",
+      "to": "first_fetch",
+      "label": "refreshAll 补历史",
+      "role": "async"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "两条写入路径",
+      "items": [
+        "本机与 CloudKit 账户都由 delegate 调 FeedFinder 发现 feed：直链、HTML 里的 link、重定向后的地址都会归一成候选。",
+        "CloudKit 在写入前用 hasFeed(withURL:) 再查一次，命中即抛 createErrorAlreadySubscribed。",
+        "Feedbin 把 URL 交给 createSubscription，返回 created / multipleChoice / alreadySubscribed / notFound 四种结果，再决定建订阅、让用户选 feed 或报错。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "OPML 批量导入",
+      "items": [
+        "importOPML 先拒绝并发导入（isOPMLImportInProgress），成功后清空 lastArticleFetchStartTime 并 refreshAll，补齐新订阅的历史文章。",
+        "OPMLNormalizer 按 feedURL 去掉同文件内重复项；没有 title 的文件夹不会创建，子项上提到上一层。",
+        "手工导入的 title 会同时写进 name 与 editedName，后续刷新不会把用户给的标题覆盖掉。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "微信公众号目录的特殊处理",
+      "items": [
+        "菜单项在运行时插入 File 菜单；点击后按需加载内置目录，isImporting 挡掉重复触发，不会并发导入。",
+        "只保留默认账户里尚不存在的 URL，把结果写成单文件夹「微信公众号」的临时 OPML，导入完成后删除临时文件。",
+        "导入复用 Account.importOPML，失败走 presentError；目录为空时只记日志，不弹错误。"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "失败与提示",
+      "items": [
+        "提交前先在目标账户查 existingFeed(withURL:)；命中就弹 Already added，并列出 feed 已所在的文件夹。",
+        "FeedFinder 找不到 feed 时弹 Unable to Add Feed；其他错误交给 NSApplication.presentError。",
+        "没有活动账户时 New Feed / New Folder 菜单项直接禁用，只能先去偏好设置添加账户。"
+      ]
+    }
+  ]
+}
