@@ -14,6 +14,7 @@
     --bg-grid:color-mix(in srgb, #1e293b 60%, transparent);
     --surface:rgba(15,23,42,.5);
     --surface-2:#0f172a;
+    --planned-bg:#0b142b;
     --text:#ffffff;
     --muted:#94a3b8;
     --dim:#475569;
@@ -41,6 +42,7 @@
     --bg-grid:rgba(18,20,23,.05);
     --surface:#ffffff;
     --surface-2:#f0f2ee;
+    --planned-bg:#eceee9;
     --text:#121417;
     --muted:rgba(18,20,23,.70);
     --dim:rgba(18,20,23,.55);
@@ -166,7 +168,7 @@
     transition:border-color .18s,transform .18s;
   }
   .card:hover{border-color:var(--line-hi);transform:translateY(-2px)}
-  .card.planned{border-style:dashed;background:transparent;box-shadow:none}
+  .card.planned{border-style:dashed;background:var(--planned-bg);box-shadow:none}
   .card.planned:hover{border-color:var(--line);transform:none}
   .card.planned .idx{color:var(--dim)}
   .card.planned .tag{color:var(--dim);border-color:var(--line)}
