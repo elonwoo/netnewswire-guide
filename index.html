@@ -146,7 +146,19 @@
   .section-head p{margin:0;color:var(--dim);font-size:13px}
   .section-head .rule{flex:1;height:1px;background:var(--line);min-width:40px}
 
-  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding-bottom:56px}
+  .layer{padding-top:8px}
+  .layer-head{max-width:72ch;margin:0 0 24px}
+  .layer-kicker{
+    margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--dim);
+  }
+  .layer-head h2{
+    margin:0 0 10px;font-size:clamp(25px,3.6vw,38px);line-height:1.16;
+    letter-spacing:-.022em;font-weight:640;text-wrap:balance;
+  }
+  .layer-head > p:last-child{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
+
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding-bottom:44px}
   .card{
     display:flex;flex-direction:column;
     background:var(--surface);border:1px solid var(--line);border-radius:12px;
@@ -154,6 +166,16 @@
     transition:border-color .18s,transform .18s;
   }
   .card:hover{border-color:var(--line-hi);transform:translateY(-2px)}
+  .card.planned{border-style:dashed;background:transparent;box-shadow:none}
+  .card.planned:hover{border-color:var(--line);transform:none}
+  .card.planned .idx{color:var(--dim)}
+  .card.planned .tag{color:var(--dim);border-color:var(--line)}
+  .card.planned h3{color:var(--muted)}
+  .card.planned .sub{color:var(--dim)}
+  .pending{
+    margin-left:auto;color:var(--dim);background:var(--surface-2);
+    letter-spacing:.1em;
+  }
   .card-head{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em}
   .idx{color:var(--accent-text);font-weight:600}
   .tag{
@@ -267,19 +289,19 @@
   <div class="wrap">
     <section class="metrics" aria-label="图集指标">
       <div class="metric">
-        <div class="metric-num">6</div>
-        <div class="metric-label">张图</div>
-        <div class="metric-note">1 张能力地图 + 5 条工作流</div>
+        <div class="metric-num">6<small> / 14</small></div>
+        <div class="metric-label">张图 · 8 张待生成</div>
+        <div class="metric-note">按组成 / 数据 / 链路 / 生命周期分层</div>
       </div>
       <div class="metric">
         <div class="metric-num">151</div>
         <div class="metric-label">个节点</div>
-        <div class="metric-note">每个节点带源码定位</div>
+        <div class="metric-note">已完成部分，每个节点带源码定位</div>
       </div>
       <div class="metric">
         <div class="metric-num">74</div>
         <div class="metric-label">条连线</div>
-        <div class="metric-note">工作流之间的调用与数据流</div>
+        <div class="metric-note">已完成部分，工作流之间的调用与数据流</div>
       </div>
       <div class="metric">
         <div class="metric-num">24</div>
@@ -290,152 +312,276 @@
 
     <section class="section" id="diagrams">
       <div class="section-head">
-        <h2>六张图</h2>
-        <p>先看能力地图定坐标，再顺着工作流往下读</p>
+        <h2>四层，十四张图</h2>
+        <p>从组成到生命周期，每层回答一个问题；虚线卡是已经规划、还没生成的图</p>
         <span class="rule" aria-hidden="true"></span>
       </div>
 
-      <div class="grid">
+      <section class="layer" aria-labelledby="layer-compose">
+        <div class="layer-head">
+          <p class="layer-kicker">Layer 01 · 组成层</p>
+          <h2 id="layer-compose">组成层，先看清谁依赖谁。</h2>
+          <p>这个系统由哪些域、哪些包组成，谁依赖谁。</p>
+        </div>
 
-        <article class="card">
-          <div class="card-head">
-            <span class="idx">01</span>
-            <span class="tag tree">能力地图</span>
-            <span class="counts"><b>81</b> 节点 · <b>0</b> 连线</span>
-          </div>
-          <h3>NetNewsWire 能力地图</h3>
-          <p class="sub">这个 fork 的全部功能能力，按包含关系逐层分解；每个叶子都指向仓库中的实现位置。</p>
-          <div class="badges">
-            <span class="badge ok">校验通过</span>
-            <span class="badge">SHOWCASE</span>
-            <span class="badge">6/6 闸门</span>
-          </div>
-          <div class="meta">
-            <span class="k">sha256</span>
-            <code>ad28de6f2fa7</code>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="diagrams/netnewswire-capabilities.html" target="_blank" rel="noopener">打开图 ↗</a>
-            <a class="btn" href="ir/capabilities.json">源 JSON</a>
-          </div>
-        </article>
+        <div class="grid">
 
-        <article class="card">
-          <div class="card-head">
-            <span class="idx">02</span>
-            <span class="tag">工作流</span>
-            <span class="counts"><b>11</b> 节点 · <b>11</b> 连线</span>
-          </div>
-          <h3>NetNewsWire 刷新管线</h3>
-          <p class="sub">从一次刷新触发到新文章出现在时间线</p>
-          <div class="badges">
-            <span class="badge ok">校验通过</span>
-            <span class="badge">SHOWCASE</span>
-            <span class="badge">6/6 闸门</span>
-          </div>
-          <div class="meta">
-            <span class="k">sha256</span>
-            <code>2332dca4c5a6</code>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="diagrams/netnewswire-refresh.html" target="_blank" rel="noopener">打开图 ↗</a>
-            <a class="btn" href="ir/refresh.json">源 JSON</a>
-          </div>
-        </article>
+          <article class="card">
+            <div class="card-head">
+              <span class="idx">01</span>
+              <span class="tag tree">能力地图</span>
+              <span class="counts"><b>81</b> 节点 · <b>0</b> 连线</span>
+            </div>
+            <h3>NetNewsWire 能力地图</h3>
+            <p class="sub">这个 fork 的全部功能能力，按包含关系逐层分解；每个叶子都指向仓库中的实现位置。</p>
+            <div class="badges">
+              <span class="badge ok">校验通过</span>
+              <span class="badge">SHOWCASE</span>
+              <span class="badge">6/6 闸门</span>
+            </div>
+            <div class="meta">
+              <span class="k">sha256</span>
+              <code>ad28de6f2fa7</code>
+            </div>
+            <div class="actions">
+              <a class="btn primary" href="diagrams/netnewswire-capabilities.html" target="_blank" rel="noopener">打开图 ↗</a>
+              <a class="btn" href="ir/capabilities.json">源 JSON</a>
+            </div>
+          </article>
 
-        <article class="card">
-          <div class="card-head">
-            <span class="idx">03</span>
-            <span class="tag">工作流</span>
-            <span class="counts"><b>17</b> 节点 · <b>18</b> 连线</span>
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">02</span>
+              <span class="tag">architecture</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>域架构</h3>
+            <p class="sub">七个功能域、依赖方向，以及所有域共用的底座边界。</p>
           </div>
-          <h3>NetNewsWire 添加订阅</h3>
-          <p class="sub">从新建订阅入口到订阅出现在侧边栏并能被抓取</p>
-          <div class="badges">
-            <span class="badge ok">校验通过</span>
-            <span class="badge">SHOWCASE</span>
-            <span class="badge">6/6 闸门</span>
-          </div>
-          <div class="meta">
-            <span class="k">sha256</span>
-            <code>fa0e7abf554d</code>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="diagrams/netnewswire-subscribe.html" target="_blank" rel="noopener">打开图 ↗</a>
-            <a class="btn" href="ir/subscribe.json">源 JSON</a>
-          </div>
-        </article>
 
-        <article class="card">
-          <div class="card-head">
-            <span class="idx">04</span>
-            <span class="tag">工作流</span>
-            <span class="counts"><b>13</b> 节点 · <b>13</b> 连线</span>
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">03</span>
+              <span class="tag">architecture</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>模块依赖</h3>
+            <p class="sub">Modules/ 下十九个 Swift 包之间谁引用谁，改一处会波及哪些包。</p>
           </div>
-          <h3>NetNewsWire 已读与星标的状态回写</h3>
-          <p class="sub">从一次标记到本地库、远端服务与界面刷新</p>
-          <div class="badges">
-            <span class="badge ok">校验通过</span>
-            <span class="badge">SHOWCASE</span>
-            <span class="badge">6/6 闸门</span>
-          </div>
-          <div class="meta">
-            <span class="k">sha256</span>
-            <code>f6e881a1f509</code>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="diagrams/netnewswire-status-sync.html" target="_blank" rel="noopener">打开图 ↗</a>
-            <a class="btn" href="ir/status-sync.json">源 JSON</a>
-          </div>
-        </article>
 
-        <article class="card">
-          <div class="card-head">
-            <span class="idx">05</span>
-            <span class="tag">工作流</span>
-            <span class="counts"><b>16</b> 节点 · <b>19</b> 连线</span>
-          </div>
-          <h3>NetNewsWire 搜索索引</h3>
-          <p class="sub">写入侧入库即建索引，查询侧两种范围走同一张表</p>
-          <div class="badges">
-            <span class="badge ok">校验通过</span>
-            <span class="badge">SHOWCASE</span>
-            <span class="badge">6/6 闸门</span>
-          </div>
-          <div class="meta">
-            <span class="k">sha256</span>
-            <code>9831c81db310</code>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="diagrams/netnewswire-search-index.html" target="_blank" rel="noopener">打开图 ↗</a>
-            <a class="btn" href="ir/search-index.json">源 JSON</a>
-          </div>
-        </article>
+        </div>
+      </section>
 
-        <article class="card">
-          <div class="card-head">
-            <span class="idx">06</span>
-            <span class="tag">工作流</span>
-            <span class="counts"><b>13</b> 节点 · <b>13</b> 连线</span>
-          </div>
-          <h3>NetNewsWire AI 翻译与改写</h3>
-          <p class="sub">一篇文章从触发到三标签展示：翻译与改写两条任务线</p>
-          <div class="badges">
-            <span class="badge ok">校验通过</span>
-            <span class="badge">SHOWCASE</span>
-            <span class="badge">6/6 闸门</span>
-          </div>
-          <div class="meta">
-            <span class="k">sha256</span>
-            <code>f6fbc03cdb31</code>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="diagrams/netnewswire-ai-pipeline.html" target="_blank" rel="noopener">打开图 ↗</a>
-            <a class="btn" href="ir/ai-pipeline.json">源 JSON</a>
-          </div>
-        </article>
+      <section class="layer" aria-labelledby="layer-data">
+        <div class="layer-head">
+          <p class="layer-kicker">Layer 02 · 数据层</p>
+          <h2 id="layer-data">数据层，数据落在哪里。</h2>
+          <p>数据落在哪些表、哪些文件里，靠什么键关联。</p>
+        </div>
 
-      </div>
+        <div class="grid">
+
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">04</span>
+              <span class="tag">erd</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>数据模型</h3>
+            <p class="sub">articles、statuses、feeds、订阅与同步队列的表结构、主键和外键。</p>
+          </div>
+
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">05</span>
+              <span class="tag">architecture</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>单账户存储布局</h3>
+            <p class="sub">每个账户目录下的 DB.sqlite3、FeedSettings.db、Sync.db、Subscriptions.opml 各存什么，凭据为什么在 Keychain。</p>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="layer" aria-labelledby="layer-path">
+        <div class="layer-head">
+          <p class="layer-kicker">Layer 03 · 链路层</p>
+          <h2 id="layer-path">链路层，跟着一次请求走。</h2>
+          <p>一条请求从进入到结果，中间经过谁。</p>
+        </div>
+
+        <div class="grid">
+
+          <article class="card">
+            <div class="card-head">
+              <span class="idx">06</span>
+              <span class="tag">工作流</span>
+              <span class="counts"><b>11</b> 节点 · <b>11</b> 连线</span>
+            </div>
+            <h3>NetNewsWire 刷新管线</h3>
+            <p class="sub">从一次刷新触发到新文章出现在时间线</p>
+            <div class="badges">
+              <span class="badge ok">校验通过</span>
+              <span class="badge">SHOWCASE</span>
+              <span class="badge">6/6 闸门</span>
+            </div>
+            <div class="meta">
+              <span class="k">sha256</span>
+              <code>2332dca4c5a6</code>
+            </div>
+            <div class="actions">
+              <a class="btn primary" href="diagrams/netnewswire-refresh.html" target="_blank" rel="noopener">打开图 ↗</a>
+              <a class="btn" href="ir/refresh.json">源 JSON</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <span class="idx">07</span>
+              <span class="tag">工作流</span>
+              <span class="counts"><b>17</b> 节点 · <b>18</b> 连线</span>
+            </div>
+            <h3>NetNewsWire 添加订阅</h3>
+            <p class="sub">从新建订阅入口到订阅出现在侧边栏并能被抓取</p>
+            <div class="badges">
+              <span class="badge ok">校验通过</span>
+              <span class="badge">SHOWCASE</span>
+              <span class="badge">6/6 闸门</span>
+            </div>
+            <div class="meta">
+              <span class="k">sha256</span>
+              <code>fa0e7abf554d</code>
+            </div>
+            <div class="actions">
+              <a class="btn primary" href="diagrams/netnewswire-subscribe.html" target="_blank" rel="noopener">打开图 ↗</a>
+              <a class="btn" href="ir/subscribe.json">源 JSON</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <span class="idx">08</span>
+              <span class="tag">工作流</span>
+              <span class="counts"><b>13</b> 节点 · <b>13</b> 连线</span>
+            </div>
+            <h3>NetNewsWire 已读与星标的状态回写</h3>
+            <p class="sub">从一次标记到本地库、远端服务与界面刷新</p>
+            <div class="badges">
+              <span class="badge ok">校验通过</span>
+              <span class="badge">SHOWCASE</span>
+              <span class="badge">6/6 闸门</span>
+            </div>
+            <div class="meta">
+              <span class="k">sha256</span>
+              <code>f6e881a1f509</code>
+            </div>
+            <div class="actions">
+              <a class="btn primary" href="diagrams/netnewswire-status-sync.html" target="_blank" rel="noopener">打开图 ↗</a>
+              <a class="btn" href="ir/status-sync.json">源 JSON</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <span class="idx">09</span>
+              <span class="tag">工作流</span>
+              <span class="counts"><b>16</b> 节点 · <b>19</b> 连线</span>
+            </div>
+            <h3>NetNewsWire 搜索索引</h3>
+            <p class="sub">写入侧入库即建索引，查询侧两种范围走同一张表</p>
+            <div class="badges">
+              <span class="badge ok">校验通过</span>
+              <span class="badge">SHOWCASE</span>
+              <span class="badge">6/6 闸门</span>
+            </div>
+            <div class="meta">
+              <span class="k">sha256</span>
+              <code>9831c81db310</code>
+            </div>
+            <div class="actions">
+              <a class="btn primary" href="diagrams/netnewswire-search-index.html" target="_blank" rel="noopener">打开图 ↗</a>
+              <a class="btn" href="ir/search-index.json">源 JSON</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <span class="idx">10</span>
+              <span class="tag">工作流</span>
+              <span class="counts"><b>13</b> 节点 · <b>13</b> 连线</span>
+            </div>
+            <h3>NetNewsWire AI 翻译与改写</h3>
+            <p class="sub">一篇文章从触发到三标签展示：翻译与改写两条任务线</p>
+            <div class="badges">
+              <span class="badge ok">校验通过</span>
+              <span class="badge">SHOWCASE</span>
+              <span class="badge">6/6 闸门</span>
+            </div>
+            <div class="meta">
+              <span class="k">sha256</span>
+              <code>f6fbc03cdb31</code>
+            </div>
+            <div class="actions">
+              <a class="btn primary" href="diagrams/netnewswire-ai-pipeline.html" target="_blank" rel="noopener">打开图 ↗</a>
+              <a class="btn" href="ir/ai-pipeline.json">源 JSON</a>
+            </div>
+          </article>
+
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">11</span>
+              <span class="tag">workflow</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>CloudKit 跨设备同步</h3>
+            <p class="sub">两台机器之间订阅、文章、已读星标怎么经 CloudKit 对齐。</p>
+          </div>
+
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">12</span>
+              <span class="tag">workflow</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>通知与界面刷新</h3>
+            <p class="sub">一次下载完成后，通知怎么传到侧边栏、时间线和未读数。</p>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="layer" aria-labelledby="layer-lifecycle">
+        <div class="layer-head">
+          <p class="layer-kicker">Layer 04 · 生命周期层</p>
+          <h2 id="layer-lifecycle">生命周期层，一个对象的一生。</h2>
+          <p>一个对象什么时候算什么状态。</p>
+        </div>
+
+        <div class="grid">
+
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">13</span>
+              <span class="tag">lifecycle</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>文章生命周期</h3>
+            <p class="sub">一篇文章从入库到被删，中间经过哪些状态（未读、已读、星标、半年自动已读、三十天清理）。</p>
+          </div>
+
+          <div class="card planned">
+            <div class="card-head">
+              <span class="idx">14</span>
+              <span class="tag">sequence</span>
+              <span class="tag pending">待生成</span>
+            </div>
+            <h3>应用启动与恢复</h3>
+            <p class="sub">启动时窗口状态怎么恢复、账户怎么加载、首屏什么时候能读。</p>
+          </div>
+
+        </div>
+      </section>
     </section>
   </div>
 </main>
