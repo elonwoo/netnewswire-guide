@@ -1,0 +1,608 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "一条 RSS 进来之后 · NetNewsWire 本地账户",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "netnewswire-local-pipeline.html",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire.git",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "lanes": [
+    {
+      "id": "exits",
+      "label": "提前退出 / 并行入口",
+      "variant": "exception"
+    },
+    {
+      "id": "local",
+      "label": "On My Mac 本地账户刷新链"
+    }
+  ],
+  "phases": [
+    {
+      "id": "intake",
+      "label": "触发与下载",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "cache",
+      "label": "条件请求 / 缓存",
+      "fromCol": 2,
+      "toCol": 2
+    },
+    {
+      "id": "parse",
+      "label": "解析",
+      "fromCol": 3,
+      "toCol": 3
+    },
+    {
+      "id": "persist",
+      "label": "账户写入",
+      "fromCol": 4,
+      "toCol": 4
+    },
+    {
+      "id": "surface",
+      "label": "通知与界面",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "refresh",
+    "queue",
+    "request",
+    "cache",
+    "hash",
+    "parse",
+    "structured",
+    "account",
+    "store",
+    "contentHash",
+    "notify",
+    "delegate",
+    "ui"
+  ],
+  "nodes": [
+    {
+      "id": "refresh",
+      "lane": "local",
+      "col": 0,
+      "type": "external",
+      "label": "有人按了刷新",
+      "sublabel": "进度空闲才执行",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 46,
+          "end_line": 58,
+          "label": "refreshAll()"
+        }
+      ]
+    },
+    {
+      "id": "queue",
+      "lane": "local",
+      "col": 1,
+      "type": "messagebus",
+      "label": "丢进下载队列",
+      "sublabel": "整批 URL 并发下载",
+      "yOffset": 50,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 150,
+          "end_line": 196,
+          "label": "重置计数 + 提交整批 URL"
+        },
+        {
+          "path": "Modules/RSWeb/Sources/RSWeb/DownloadSession.swift",
+          "line": 288,
+          "end_line": 298,
+          "label": "并发 dataTask"
+        }
+      ]
+    },
+    {
+      "id": "request",
+      "lane": "local",
+      "col": 1,
+      "type": "cloud",
+      "label": "发请求带条件 GET 头",
+      "sublabel": "超 8 天丢弃条件信息",
+      "yOffset": -50,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 238,
+          "end_line": 266,
+          "label": "条件信息 + 8 天窗口"
+        },
+        {
+          "path": "Modules/RSWeb/Sources/RSWeb/DownloadSession.swift",
+          "line": 282,
+          "end_line": 289,
+          "label": "构造带条件头的请求"
+        },
+        {
+          "path": "Modules/RSWeb/Sources/RSWeb/HTTPConditionalGetInfo.swift",
+          "line": 36,
+          "end_line": 45,
+          "label": "If-Modified-Since / If-None-Match"
+        }
+      ]
+    },
+    {
+      "id": "cache",
+      "lane": "local",
+      "col": 2,
+      "type": "backend",
+      "label": "写回缓存信息",
+      "sublabel": "conditionalGetInfo · cacheControl",
+      "yOffset": 50,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 360,
+          "end_line": 364,
+          "label": "写 conditionalGetInfo"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 374,
+          "end_line": 377,
+          "label": "写 cacheControlInfo"
+        }
+      ]
+    },
+    {
+      "id": "hash",
+      "lane": "local",
+      "col": 2,
+      "type": "backend",
+      "label": "MD5 比对内容",
+      "sublabel": "与 feed.contentHash 比较",
+      "yOffset": -50,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 388,
+          "end_line": 397,
+          "label": "MD5 短路"
+        }
+      ]
+    },
+    {
+      "id": "parse",
+      "lane": "local",
+      "col": 3,
+      "type": "backend",
+      "label": "解析成 ParsedFeed",
+      "sublabel": "RSS / Atom / JSON",
+      "yOffset": -50,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 416,
+          "end_line": 428,
+          "label": "FeedParser.parse"
+        },
+        {
+          "path": "Modules/RSParser/Sources/RSParser/Feeds/FeedParser.swift",
+          "line": 50,
+          "end_line": 69,
+          "label": "按格式分派解析器"
+        }
+      ]
+    },
+    {
+      "id": "structured",
+      "lane": "local",
+      "col": 3,
+      "type": "backend",
+      "label": "结构化结果",
+      "sublabel": "feed 元信息 + ParsedItem 集合",
+      "yOffset": 90,
+      "sources": [
+        {
+          "path": "Modules/RSParser/Sources/RSParser/Feeds/ParsedFeed.swift",
+          "line": 11,
+          "end_line": 24,
+          "label": "ParsedFeed 定义"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 938,
+          "end_line": 939,
+          "label": "取元信息与 items"
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "lane": "local",
+      "col": 4,
+      "type": "backend",
+      "label": "交给账户更新",
+      "sublabel": "updateAsync(feed:parsedFeed:)",
+      "yOffset": 90,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 455,
+          "end_line": 456,
+          "label": "调用账户 updateAsync"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 933,
+          "end_line": 945,
+          "label": "updateAsync(feed:parsedFeed:)"
+        }
+      ]
+    },
+    {
+      "id": "store",
+      "lane": "local",
+      "col": 4,
+      "type": "database",
+      "label": "写库 articles + statuses",
+      "sublabel": "产出 ArticleChanges",
+      "yOffset": 0,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 947,
+          "end_line": 955,
+          "label": "database.updateAsync"
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 329,
+          "end_line": 335,
+          "label": "feed-based 写入入口"
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 236,
+          "end_line": 264,
+          "label": "statuses + 新旧文章 + 回调"
+        }
+      ]
+    },
+    {
+      "id": "contentHash",
+      "lane": "local",
+      "col": 4,
+      "type": "backend",
+      "label": "更新 feed 内容哈希",
+      "sublabel": "contentHash = MD5",
+      "yOffset": -90,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 462,
+          "end_line": 466,
+          "label": "写入 contentHash"
+        }
+      ]
+    },
+    {
+      "id": "notify",
+      "lane": "local",
+      "col": 5,
+      "type": "messagebus",
+      "label": "发通知",
+      "sublabel": "AccountDidDownloadArticles",
+      "yOffset": -90,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 1540,
+          "end_line": 1577,
+          "label": "sendNotificationAbout"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 947,
+          "end_line": 955,
+          "label": "写库后立即发通知"
+        }
+      ]
+    },
+    {
+      "id": "delegate",
+      "lane": "local",
+      "col": 5,
+      "type": "backend",
+      "label": "回调 delegate 收口",
+      "sublabel": "本地账户是空实现",
+      "yOffset": 0,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 468,
+          "end_line": 472,
+          "label": "delegate 回调"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 180,
+          "end_line": 184,
+          "label": "空实现"
+        }
+      ]
+    },
+    {
+      "id": "ui",
+      "lane": "local",
+      "col": 5,
+      "type": "frontend",
+      "label": "未读数与界面刷新",
+      "sublabel": "unreadCount + 时间线重载",
+      "yOffset": 90,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 1569,
+          "end_line": 1576,
+          "label": "触发未读数刷新"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 816,
+          "end_line": 818,
+          "label": "updateUnreadCounts"
+        },
+        {
+          "path": "Mac/MainWindow/Timeline/TimelineViewController.swift",
+          "line": 911,
+          "end_line": 920,
+          "label": "时间线收到通知后重载"
+        }
+      ]
+    },
+    {
+      "id": "err_http",
+      "lane": "exits",
+      "col": 0,
+      "type": "backend",
+      "label": "出错，记 ErrorLog",
+      "sublabel": "feedsErrored += 1，feed 不动",
+      "yOffset": 45,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 344,
+          "end_line": 356,
+          "label": "非 2xx 状态码"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 510,
+          "end_line": 520,
+          "label": "ErrorLog + 计数"
+        }
+      ]
+    },
+    {
+      "id": "not_modified",
+      "lane": "exits",
+      "col": 2,
+      "type": "backend",
+      "label": "304 Not Modified",
+      "sublabel": "不下载不解析，直接结束",
+      "yOffset": -45,
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 366,
+          "end_line": 372,
+          "label": "304 直接返回"
+        }
+      ]
+    },
+    {
+      "id": "hash_same",
+      "lane": "exits",
+      "col": 2,
+      "type": "backend",
+      "label": "内容没变，跳过解析",
+      "sublabel": "服务器回 200 但字节相同",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 390,
+          "end_line": 397,
+          "label": "哈希相同直接返回"
+        }
+      ],
+      "yOffset": 45
+    },
+    {
+      "id": "parse_failed",
+      "lane": "exits",
+      "col": 3,
+      "type": "backend",
+      "label": "解析失败，记 ErrorLog",
+      "sublabel": "feedsErrored += 1，feed 不删",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 429,
+          "end_line": 442,
+          "label": "解析失败 + ErrorLog"
+        }
+      ]
+    },
+    {
+      "id": "new_feed",
+      "lane": "exits",
+      "col": 4,
+      "type": "frontend",
+      "label": "新添加 feed 先试下载",
+      "sublabel": "确认地址后建 feed，直接更新",
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountDelegate.swift",
+          "line": 188,
+          "end_line": 230,
+          "label": "createFeed"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/InitialFeedDownloader.swift",
+          "line": 16,
+          "end_line": 27,
+          "label": "首次下载并解析"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-refresh-queue",
+      "from": "refresh",
+      "to": "queue",
+      "label": "刷新全部 feed",
+      "role": "main"
+    },
+    {
+      "id": "e-queue-request",
+      "from": "queue",
+      "to": "request",
+      "role": "main"
+    },
+    {
+      "id": "e-request-cache",
+      "from": "request",
+      "to": "cache",
+      "label": "200",
+      "role": "main"
+    },
+    {
+      "id": "e-cache-hash",
+      "from": "cache",
+      "to": "hash",
+      "role": "main"
+    },
+    {
+      "id": "e-hash-parse",
+      "from": "hash",
+      "to": "parse",
+      "label": "内容变了",
+      "role": "main"
+    },
+    {
+      "id": "e-parse-structured",
+      "from": "parse",
+      "to": "structured",
+      "role": "main"
+    },
+    {
+      "id": "e-structured-account",
+      "from": "structured",
+      "to": "account",
+      "role": "main"
+    },
+    {
+      "id": "e-account-store",
+      "from": "account",
+      "to": "store",
+      "role": "main"
+    },
+    {
+      "id": "e-store-contenthash",
+      "from": "store",
+      "to": "contentHash",
+      "role": "main"
+    },
+    {
+      "id": "e-contenthash-notify",
+      "from": "contentHash",
+      "to": "notify",
+      "role": "main"
+    },
+    {
+      "id": "e-notify-delegate",
+      "from": "notify",
+      "to": "delegate",
+      "role": "main"
+    },
+    {
+      "id": "e-delegate-ui",
+      "from": "delegate",
+      "to": "ui",
+      "role": "main"
+    },
+    {
+      "id": "e-request-err",
+      "from": "request",
+      "to": "err_http",
+      "label": "非 2xx",
+      "role": "error",
+      "variant": "security"
+    },
+    {
+      "id": "e-request-304",
+      "from": "request",
+      "to": "not_modified",
+      "label": "304",
+      "role": "branch",
+      "variant": "dashed"
+    },
+    {
+      "id": "e-hash-same",
+      "from": "hash",
+      "to": "hash_same",
+      "label": "内容没变",
+      "role": "branch",
+      "variant": "dashed"
+    },
+    {
+      "id": "e-parse-failed",
+      "from": "parse",
+      "to": "parse_failed",
+      "label": "解析失败",
+      "role": "error",
+      "variant": "security"
+    },
+    {
+      "id": "e-newfeed-account",
+      "from": "new_feed",
+      "to": "account",
+      "label": "首次下载后直接更新",
+      "role": "async",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "同步型账户不走 6–8 步",
+      "items": [
+        "Feedbin / Feedly / NewsBlur / Reader API / CloudKit 只问服务端「哪些文章变了」。",
+        "本地不下载、不解析：写缓存、MD5 比对、解析整段跳过。",
+        "这条链的缝在 6 之前与 9 之后，只有这两段对两类账户都成立。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "对原稿的取证修正",
+      "items": [
+        "旧行号 920 / 1526 已作废：updateAsync(feed:parsedFeed:) 在 Account.swift 933–945，sendNotificationAbout 在 1540–1577。",
+        "代码时序是先写 conditionalGetInfo、再判 304、再写 cacheControl、最后 MD5；所以 6 排在 5 前面。",
+        "304 路径也会先写回 conditionalGetInfo 再返回。",
+        "本地账户的 delegate 回调是空实现（LocalAccountDelegate.swift 180–184）。"
+      ]
+    }
+  ]
+}

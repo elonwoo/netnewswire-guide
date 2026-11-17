@@ -1,0 +1,604 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "NetNewsWire 功能网络",
+    "output": "netnewswire-domains.html",
+    "quality_profile": "showcase",
+    "locale": "zh-CN",
+    "repository": {
+      "url": "https://github.com/elonwoo/NetNewsWire",
+      "revision": "512e461782a2d283d71a07f08e38201bf38da310",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "components": [
+    {
+      "id": "d1",
+      "type": "backend",
+      "tag": "D1",
+      "label": "订阅与组织",
+      "sublabel": "源 · 文件夹 · OPML",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 682,
+          "end_line": 744,
+          "label": "addFeed / createFeed / removeFeed"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/Account.swift",
+          "line": 746,
+          "end_line": 808,
+          "label": "移动、重命名、恢复 feed 与文件夹"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/OPMLFile.swift",
+          "line": 14,
+          "end_line": 60,
+          "label": "OPML 读入与落盘"
+        }
+      ]
+    },
+    {
+      "id": "d2",
+      "type": "backend",
+      "tag": "D2",
+      "label": "内容获取",
+      "sublabel": "下载 · 304 · 哈希",
+      "pos": [
+        290,
+        60
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 238,
+          "end_line": 266,
+          "label": "条件 GET 信息与 8 天窗口"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/LocalAccount/LocalAccountRefresher.swift",
+          "line": 344,
+          "end_line": 399,
+          "label": "响应码、304 短路、哈希比对"
+        },
+        {
+          "path": "Modules/RSWeb/Sources/RSWeb/Downloader.swift",
+          "line": 81,
+          "end_line": 136,
+          "label": "并发下载与请求合并"
+        }
+      ]
+    },
+    {
+      "id": "d3",
+      "type": "backend",
+      "tag": "D3",
+      "label": "解析",
+      "sublabel": "RSS · Atom · JSON",
+      "pos": [
+        540,
+        60
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "Modules/RSParser/Sources/RSParser/Feeds/FeedParser.swift",
+          "line": 44,
+          "end_line": 71,
+          "label": "按格式分发到各解析器"
+        },
+        {
+          "path": "Modules/FeedFinder/Sources/FeedFinder/FeedFinder.swift",
+          "line": 40,
+          "end_line": 70,
+          "label": "feed 自动发现"
+        },
+        {
+          "path": "Modules/RSParser/Sources/RSParser/Utilities/DateParser.swift",
+          "line": 10,
+          "end_line": 40,
+          "label": "日期归一"
+        }
+      ]
+    },
+    {
+      "id": "d4",
+      "type": "database",
+      "tag": "D4",
+      "label": "存储与检索",
+      "sublabel": "articles · statuses",
+      "pos": [
+        790,
+        60
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesDatabase.swift",
+          "line": 47,
+          "end_line": 108,
+          "label": "两套保留策略与建表"
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/ArticlesTable.swift",
+          "line": 52,
+          "end_line": 110,
+          "label": "文章读取变体与计数"
+        },
+        {
+          "path": "Modules/ArticlesDatabase/Sources/ArticlesDatabase/StatusesTable.swift",
+          "line": 68,
+          "end_line": 141,
+          "label": "状态写入与查询"
+        }
+      ]
+    },
+    {
+      "id": "d7",
+      "type": "backend",
+      "tag": "D7",
+      "label": "对外集成",
+      "sublabel": "分享 · 扩展 · 脚本",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "Mac/SafariExtension/SafariExtensionHandler.swift",
+          "line": 17,
+          "end_line": 35,
+          "label": "浏览器扩展订阅入口"
+        },
+        {
+          "path": "Mac/Scripting/AppDelegate+Scriptability.swift",
+          "line": 23,
+          "end_line": 47,
+          "label": "AppleScript 与 URL 事件"
+        },
+        {
+          "path": "Mac/MainWindow/SharingServiceDelegate.swift",
+          "line": 11,
+          "end_line": 32,
+          "label": "系统分享"
+        }
+      ]
+    },
+    {
+      "id": "d6",
+      "type": "backend",
+      "tag": "D6",
+      "label": "状态与同步",
+      "sublabel": "已读 · 星标 · CloudKit",
+      "pos": [
+        540,
+        260
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "Shared/Commands/MarkStatusCommand.swift",
+          "line": 15,
+          "end_line": 78,
+          "label": "可撤销的状态标记"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/CloudKit/CloudKitSendStatusOperation.swift",
+          "line": 18,
+          "end_line": 56,
+          "label": "CloudKit 状态上传"
+        },
+        {
+          "path": "Modules/Account/Sources/Account/SyncRateLimiter.swift",
+          "line": 13,
+          "end_line": 60,
+          "label": "同步限流"
+        }
+      ]
+    },
+    {
+      "id": "d5",
+      "type": "frontend",
+      "tag": "D5",
+      "label": "阅读与呈现",
+      "sublabel": "三栏 · 渲染 · 主题",
+      "pos": [
+        790,
+        260
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "Mac/MainWindow/MainWindowController.swift",
+          "line": 122,
+          "end_line": 169,
+          "label": "三栏窗口装配"
+        },
+        {
+          "path": "Shared/Article Rendering/ArticleRenderer.swift",
+          "line": 149,
+          "end_line": 187,
+          "label": "正文 HTML 渲染"
+        },
+        {
+          "path": "Shared/ArticleStyles/ArticleThemesManager.swift",
+          "line": 135,
+          "end_line": 175,
+          "label": "主题导入与选用"
+        }
+      ]
+    },
+    {
+      "id": "rscore",
+      "type": "backend",
+      "label": "RSCore",
+      "sublabel": "主线程操作队列",
+      "pos": [
+        40,
+        560
+      ],
+      "size": [
+        124,
+        56
+      ],
+      "sources": [
+        {
+          "path": "Modules/RSCore/Sources/RSCore/MainThreadOperation.swift",
+          "line": 13,
+          "end_line": 27,
+          "label": "MainThreadOperation"
+        }
+      ]
+    },
+    {
+      "id": "rsweb",
+      "type": "backend",
+      "label": "RSWeb",
+      "sublabel": "下载会话与条件 GET",
+      "pos": [
+        176,
+        560
+      ],
+      "size": [
+        124,
+        56
+      ],
+      "sources": [
+        {
+          "path": "Modules/RSWeb/Sources/RSWeb/DownloadSession.swift",
+          "line": 16,
+          "end_line": 25,
+          "label": "DownloadSessionDelegate"
+        }
+      ]
+    },
+    {
+      "id": "rsdatabase",
+      "type": "backend",
+      "label": "RSDatabase",
+      "sublabel": "SQLite 封装",
+      "pos": [
+        312,
+        560
+      ],
+      "size": [
+        124,
+        56
+      ],
+      "sources": [
+        {
+          "path": "Modules/RSDatabase/Sources/RSDatabase/Database.swift",
+          "line": 12,
+          "end_line": 16,
+          "label": "DatabaseBlock"
+        }
+      ]
+    },
+    {
+      "id": "rstree",
+      "type": "backend",
+      "label": "RSTree",
+      "sublabel": "订阅树节点",
+      "pos": [
+        448,
+        560
+      ],
+      "size": [
+        124,
+        56
+      ],
+      "sources": [
+        {
+          "path": "Modules/RSTree/Sources/RSTree/Node.swift",
+          "line": 11,
+          "end_line": 22,
+          "label": "Node"
+        }
+      ]
+    },
+    {
+      "id": "secrets",
+      "type": "backend",
+      "label": "Secrets",
+      "sublabel": "钥匙串凭据",
+      "pos": [
+        584,
+        560
+      ],
+      "size": [
+        124,
+        56
+      ],
+      "sources": [
+        {
+          "path": "Modules/Secrets/Sources/Secrets/CredentialsManager.swift",
+          "line": 15,
+          "end_line": 28,
+          "label": "CredentialsManager"
+        }
+      ]
+    },
+    {
+      "id": "errorlog",
+      "type": "backend",
+      "label": "ErrorLog",
+      "sublabel": "错误日志 200 条",
+      "pos": [
+        720,
+        560
+      ],
+      "size": [
+        124,
+        56
+      ],
+      "sources": [
+        {
+          "path": "Modules/ErrorLog/Sources/ErrorLog/ErrorLogDatabase.swift",
+          "line": 13,
+          "end_line": 21,
+          "label": "ErrorLogDatabase"
+        }
+      ]
+    },
+    {
+      "id": "activitylog",
+      "type": "backend",
+      "label": "ActivityLog",
+      "sublabel": "活动状态追踪",
+      "pos": [
+        856,
+        560
+      ],
+      "size": [
+        124,
+        56
+      ],
+      "sources": [
+        {
+          "path": "Modules/ActivityLog/Sources/ActivityLog/ActivityLog.swift",
+          "line": 15,
+          "end_line": 25,
+          "label": "ActivityLog"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "共用底座 · 七个域共同依赖",
+      "wraps": [
+        "rscore",
+        "rsweb",
+        "rsdatabase",
+        "rstree",
+        "secrets",
+        "errorlog",
+        "activitylog"
+      ],
+      "pad": 16
+    }
+  ],
+  "connections": [
+    {
+      "id": "d1-d2",
+      "from": "d1",
+      "to": "d2",
+      "label": "源",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "d2-d3",
+      "from": "d2",
+      "to": "d3",
+      "label": "字节",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "d3-d4",
+      "from": "d3",
+      "to": "d4",
+      "label": "结构",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "d4-d5",
+      "from": "d4",
+      "to": "d5",
+      "label": "文章",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "d5-d6",
+      "from": "d5",
+      "to": "d6",
+      "label": "操作",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "d6-d4",
+      "from": "d6",
+      "to": "d4",
+      "label": "状态回写",
+      "variant": "emphasis"
+    },
+    {
+      "id": "d7-d1",
+      "from": "d7",
+      "to": "d1",
+      "label": "新订阅",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "d5-d7",
+      "from": "d5",
+      "to": "d7",
+      "label": "分享 / 发送到",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [
+        [
+          875,
+          400
+        ],
+        [
+          125,
+          400
+        ]
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "D1 订阅与组织",
+      "items": [
+        "添加 feed：URL、自动发现、浏览器扩展",
+        "文件夹层级与拖拽移动",
+        "重命名、删除与恢复",
+        "OPML 导入导出",
+        "内置默认订阅",
+        "代码：Modules/Account、Shared/Importers、Shared/Exporters"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "D2 内容获取",
+      "items": [
+        "定时与手动刷新、并发下载",
+        "条件 GET 与 304 短路",
+        "MD5 哈希比对",
+        "8 天条件信息窗口",
+        "缓存头、429、重定向",
+        "代码：LocalAccountRefresher、RSWeb/DownloadSession、RSWeb/Downloader"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "D3 解析",
+      "items": [
+        "RSS、Atom、JSON Feed、RSS-in-JSON、OPML",
+        "HTML 元数据",
+        "feed 自动发现",
+        "日期、作者、附件归一",
+        "代码：Modules/RSParser、Modules/HTMLMetadata、Modules/FeedFinder"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "D4 存储与检索",
+      "items": [
+        "articles 与 statuses 两表",
+        "两套保留策略（feedBased / syncSystem）",
+        "全文搜索",
+        "附件、作者",
+        "老文章重现判定",
+        "代码：Modules/ArticlesDatabase、Modules/RSDatabase、Modules/SyncDatabase"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "D5 阅读与呈现",
+      "items": [
+        "三栏界面、正文渲染",
+        "主题 CSS 与主题下载",
+        "阅读器模式、正文抽取",
+        "智能订阅、图片缓存、暗色模式",
+        "代码：Mac/MainWindow、iOS/MainTimeline、Shared/Article Rendering、Shared/ArticleStyles"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "D6 状态与同步",
+      "items": [
+        "已读、星标两个状态键",
+        "文章删除时连带清理状态记录",
+        "未读计数",
+        "CloudKit 状态收发（每批 150 条）",
+        "Feedbin / Feedly / NewsBlur / Reader API",
+        "同步限流",
+        "代码：Modules/CloudKitSync、Shared/Commands、Modules/Account/*"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "D7 对外集成",
+      "items": [
+        "分享扩展",
+        "Safari 订阅扩展",
+        "AppleScript",
+        "发送到 MarsEdit / 微博",
+        "通知与活动日志",
+        "代码：Mac/SafariExtension、Mac/Scripting、Shared/ExtensionPoints",
+        "Widget、Siri、App Intents 属 iOS 独有功能，本图按代码库整体口径不收"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "D8 平台分叉",
+      "items": [
+        "不进节点：每个域下面都是两套实现，Mac 用 AppKit、iOS 用 UIKit",
+        "只有 Shared/ 里的代码两边共用",
+        "同一处改动落在平台目录就是双份工，落在 Shared 才是一份",
+        "这是二开预算里最容易漏掉的一项"
+      ]
+    }
+  ]
+}
