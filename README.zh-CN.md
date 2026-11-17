@@ -2,6 +2,8 @@
 
 [English →](README.md)
 
+**线上站点 →** [https://nnw.elonwoo.com/](https://nnw.elonwoo.com/)
+
 Unofficial visual guide to the NetNewsWire codebase — a capability map plus source-cited flow diagrams showing how its features are built and how data moves through them.
 
 ## 这是什么
