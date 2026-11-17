@@ -42,8 +42,6 @@ Unofficial visual guide to the NetNewsWire codebase — a capability map plus so
 
 六张图四道闸门全部通过（6 × 4 = 24 次）。
 
-站内 `diagrams/` 的六张图是在 archify 原始产物基础上统一配色的副本，因此站内文件的 SHA-256 与 archify 收据里的原始哈希不同；原始未改色版本可用 `ir/*.json` 重新生成。备用预设（signal-flow / blueprint / editorial）保留各自原始配色，只有默认的 classic 预设与站点主题一致。语义色按含义保留（成功、错误、不同组件类型各用固定色相），因此图内并非单色；这是图的信息，不是漏改。
-
 ## 许可与非官方声明
 
 本项目不是 NetNewsWire 官方项目。源项目 NetNewsWire 采用 MIT 许可，本图集内容同样以 MIT 许可发布。
