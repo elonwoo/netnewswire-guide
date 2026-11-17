@@ -217,6 +217,13 @@
     .metric:nth-child(1),.metric:nth-child(3){border-right:1px solid var(--line)}
   }
 </style>
+<script>
+(function () {
+  var stored;
+  try { stored = localStorage.getItem('nnw-guide-theme'); } catch (e) {}
+  if (stored !== 'dark') { document.documentElement.setAttribute('data-theme', 'light'); }
+})();
+</script>
 </head>
 <body>
 
@@ -448,7 +455,6 @@
     btn.textContent = light ? '深色' : '浅色';
     btn.setAttribute('aria-label', light ? '切换到深色主题' : '切换到浅色主题');
   }
-  try { if (localStorage.getItem('nnw-guide-theme') === 'light') { root.setAttribute('data-theme', 'light'); } } catch (e) {}
   label();
   btn.addEventListener('click', function () {
     var light = root.getAttribute('data-theme') === 'light';
