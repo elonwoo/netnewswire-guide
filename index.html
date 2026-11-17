@@ -17,6 +17,7 @@
     --line:#1e293b;
     --line-hi:#334155;
     --accent:#22d3ee;
+    --accent-text:#22d3ee;
     --accent-soft:rgba(8,51,68,.4);
     --ok:#34d399;
     --ok-soft:rgba(6,78,59,.4);
@@ -33,26 +34,27 @@
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   }
   html[data-theme="light"]{
-    --bg:#f4f5f7;
-    --bg-grid:color-mix(in srgb, #e9edf2 70%, transparent);
+    --bg:#f5f6f3;
+    --bg-grid:rgba(18,20,23,.05);
     --surface:#ffffff;
-    --surface-2:#f8fafc;
-    --text:#111827;
-    --muted:#5b6474;
-    --dim:#9aa3b2;
-    --line:#e5e7eb;
-    --line-hi:#cbd5e1;
-    --accent:#0e7490;
-    --accent-soft:rgba(34,211,238,.15);
+    --surface-2:#f0f2ee;
+    --text:#121417;
+    --muted:rgba(18,20,23,.70);
+    --dim:rgba(18,20,23,.55);
+    --line:rgba(18,20,23,.09);
+    --line-hi:rgba(18,20,23,.16);
+    --accent:#e2500e;
+    --accent-text:#b83e08;
+    --accent-soft:rgba(226,80,14,.10);
     --ok:#059669;
-    --ok-soft:rgba(52,211,153,.18);
+    --ok-soft:rgba(5,150,105,.12);
     --ok-line:rgba(5,150,105,.35);
-    --btn-bg:#0e7490;
+    --btn-bg:#121417;
     --btn-fg:#ffffff;
-    --btn-hover:#155e75;
+    --btn-hover:#000000;
     --btn-hover-fg:#ffffff;
-    --shadow:0 1px 2px rgba(17,24,39,.06);
-    --bar-bg:rgba(244,245,247,.85);
+    --shadow:0 1px 2px rgba(24,28,34,.06);
+    --bar-bg:rgba(245,246,243,.85);
     --glow-a:none;
     --glow-b:none;
   }
@@ -91,7 +93,7 @@
     color:var(--muted);text-decoration:none;font-size:13px;line-height:1;
     transition:color .16s,border-color .16s,background .16s;
   }
-  .toplink:hover{color:var(--text);border-color:var(--accent);background:var(--accent-soft)}
+  .toplink:hover{color:var(--accent-text);border-color:var(--accent);background:var(--accent-soft)}
   .theme-btn{
     height:34px;padding:0 11px;display:inline-flex;align-items:center;justify-content:center;
     border:1px solid var(--line-hi);border-radius:7px;background:transparent;
@@ -104,7 +106,7 @@
   .hero{padding:88px 0 56px;border-bottom:1px solid var(--line)}
   .eyebrow{
     font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--accent);margin:0 0 22px;
+    color:var(--accent-text);margin:0 0 22px;
   }
   h1{
     margin:0 0 24px;font-size:clamp(38px,6.2vw,76px);line-height:1.04;
@@ -113,6 +115,7 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;
     max-width:20ch;
   }
+  html[data-theme="light"] .hl{color:var(--accent)}
   .lede{max-width:66ch;margin:0;color:var(--muted);font-size:16.5px;line-height:1.8;text-wrap:pretty}
   .lede code{font-family:var(--mono);font-size:.9em;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
   .hero-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:30px}
@@ -149,12 +152,12 @@
   }
   .card:hover{border-color:var(--line-hi);transform:translateY(-2px)}
   .card-head{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em}
-  .idx{color:var(--accent);font-weight:600}
+  .idx{color:var(--accent-text);font-weight:600}
   .tag{
     text-transform:uppercase;color:var(--muted);
     border:1px solid var(--line);border-radius:4px;padding:2px 6px;letter-spacing:.1em;
   }
-  .tag.tree{color:var(--accent);border-color:var(--accent-soft);background:var(--accent-soft)}
+  .tag.tree{color:var(--accent-text);border-color:var(--accent-soft);background:var(--accent-soft)}
   .counts{margin-left:auto;color:var(--dim);letter-spacing:.04em;white-space:nowrap}
   .counts b{color:var(--muted);font-weight:600}
   .card h3{margin:16px 0 8px;font-size:17.5px;line-height:1.4;font-weight:600;letter-spacing:-.01em}
@@ -178,7 +181,7 @@
     color:var(--text);text-decoration:none;font-size:12.5px;font-weight:500;white-space:nowrap;
     transition:background .16s,border-color .16s,color .16s;
   }
-  .btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .btn:hover{border-color:var(--accent);color:var(--accent-text);background:var(--accent-soft)}
   .btn.primary{background:var(--btn-bg);color:var(--btn-fg);border-color:var(--btn-bg)}
   .btn.primary:hover{background:var(--btn-hover);border-color:var(--btn-hover);color:var(--btn-hover-fg)}
 
@@ -188,7 +191,7 @@
   .foot strong{color:var(--muted);font-weight:600}
   .foot .sep{color:var(--line-hi)}
   .foot a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line-hi)}
-  .foot a:hover{color:var(--accent);border-color:var(--accent)}
+  .foot a:hover{color:var(--accent-text);border-color:var(--accent)}
   .foot-mono{font-family:var(--mono);font-size:11.5px}
 
   /* ---------- responsive ---------- */
@@ -245,7 +248,7 @@
   <section class="hero">
     <div class="wrap">
       <p class="eyebrow">Visual guide / source-cited diagrams</p>
-      <h1>先看图，再读代码</h1>
+      <h1>先看图，<span class="hl">再读代码</span></h1>
       <p class="lede">
         这是对一个 NetNewsWire fork 的源码解读。每张图上每个节点都标了原始文件与行号，点开即可跳到 GitHub 上对应的位置；
         所有图由同一份 JSON IR 生成，并通过结构校验。基线提交 <code>512e461</code>。
